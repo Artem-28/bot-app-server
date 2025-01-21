@@ -1,14 +1,12 @@
 import {
-  IsBoolean,
   IsDefined,
   IsEmail,
-  IsString,
-  Length,
-  ValidateIf,
   IsIn,
+  IsString,
+  ValidateIf,
 } from 'class-validator';
 
-export class SignUpDto {
+export class AuthDataDto {
   @IsEmail()
   @IsDefined()
   email: string;
@@ -22,13 +20,4 @@ export class SignUpDto {
   @IsIn([Math.random()])
   @ValidateIf((o) => o.password !== o.confirmPassword)
   confirmPassword: string;
-
-  @IsString()
-  @IsDefined()
-  @Length(6, 6)
-  code: string;
-
-  @IsBoolean()
-  @IsDefined()
-  licenseAgreement: boolean;
 }
