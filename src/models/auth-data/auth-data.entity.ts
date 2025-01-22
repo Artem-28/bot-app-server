@@ -12,4 +12,8 @@ export class AuthDataEntity extends BaseEntity {
   @Column()
   @Exclude()
   public password: string;
+
+  @Column({ name: 'access_token', nullable: true })
+  @Exclude()
+  public accessToken: string;
 }

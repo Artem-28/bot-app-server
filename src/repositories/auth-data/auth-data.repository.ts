@@ -33,4 +33,15 @@ export class AuthDataRepository
     if (!result) return null;
     return AuthDataAggregate.create(result);
   }
+
+  public async update(id: number, data: Partial<IAuthData>) {
+    const result = await this.getRepository(AuthDataEntity)
+      .createQueryBuilder()
+      .update()
+      .set(data)
+      .where({ id })
+      .execute();
+
+    return !!result.affected;
+  }
 }

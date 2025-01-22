@@ -12,6 +12,11 @@ const table = hCreateTable(AUTH_DATA_TABLE, [
     name: 'password',
     type: 'varchar',
   },
+  {
+    name: 'access_token',
+    type: 'varchar',
+    isNullable: true,
+  },
 ]);
 
 export class CreateAuthDataTable1737392448870 implements MigrationInterface {

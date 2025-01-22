@@ -12,3 +12,8 @@ export interface IPagination {
   skip?: number;
   take?: number;
 }
+
+export interface IToken {
+  accessToken: string | null;
+  tokenType: 'Bearer' | null;
+}
