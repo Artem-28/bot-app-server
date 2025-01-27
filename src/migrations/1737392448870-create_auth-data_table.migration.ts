@@ -13,7 +13,7 @@ const table = hCreateTable(AUTH_DATA_TABLE, [
     type: 'varchar',
   },
   {
-    name: 'access_token',
+    name: 'hash_token',
     type: 'varchar',
     isNullable: true,
   },

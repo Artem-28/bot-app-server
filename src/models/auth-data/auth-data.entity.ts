@@ -13,7 +13,7 @@ export class AuthDataEntity extends BaseEntity {
   @Exclude()
   public password: string;
 
-  @Column({ name: 'access_token', nullable: true })
+  @Column({ name: 'hash_token', nullable: true })
   @Exclude()
-  public accessToken: string;
+  public hashToken: string;
 }

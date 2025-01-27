@@ -24,7 +24,7 @@ export class AuthDataAggregate extends BaseAggregate implements IAuthData {
 
   @IsOptional()
   @Exclude()
-  accessToken: string | null;
+  hashToken: string | null;
 
   static create(data: Partial<IAuthData>) {
     const _entity = new AuthDataAggregate();
@@ -41,7 +41,7 @@ export class AuthDataAggregate extends BaseAggregate implements IAuthData {
     return {
       login: this.login,
       password: this.password,
-      accessToken: this.accessToken,
+      hashToken: this.hashToken,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

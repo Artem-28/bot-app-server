@@ -7,7 +7,7 @@ import { SignInDto } from '@/modules/auth/dto';
 import { CommonError } from '@/common/error';
 import { JwtService } from '@nestjs/jwt';
 import { IToken } from '@/common/types';
-import {log} from "util";
+import { log } from 'util';
 
 @Injectable()
 export class AuthDataService {
@@ -53,7 +53,7 @@ export class AuthDataService {
 
   public async removeToken(authDataId: number, throwException = false) {
     const success = await this._authDataRepository.update(authDataId, {
-      accessToken: null,
+      hashToken: null,
     });
     if (!success && throwException) {
       throw new CommonError({
@@ -76,7 +76,7 @@ export class AuthDataService {
     const decodeToken = this._jwtService.decode(accessToken);
     const hashToken = await bcrypt.hash(JSON.stringify(decodeToken), 10);
     const success = await this._authDataRepository.update(authData.id, {
-      accessToken: hashToken,
+      hashToken,
     });
     if (!success && throwException) {
       throw new CommonError({

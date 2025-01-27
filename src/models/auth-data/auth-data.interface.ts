@@ -8,5 +8,5 @@ export interface IAuthData extends IBase {
   password: string;
 
   /** Токен авторизации пользователя */
-  accessToken: string | null;
+  hashToken: string | null;
 }
