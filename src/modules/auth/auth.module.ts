@@ -7,6 +7,7 @@ import { UserService } from '@/modules/user/user.service';
 import { UserRepository } from '@/repositories/user';
 import { ConfirmCodeService } from '@/modules/confirm-code/confirm-code.service';
 import { ConfirmCodeRepository } from '@/repositories/confirm-code';
+import { MailService } from '@/modules/mail/mail.service';
 
 @Module({
   providers: [
@@ -17,6 +18,7 @@ import { ConfirmCodeRepository } from '@/repositories/confirm-code';
     UserRepository,
     ConfirmCodeService,
     ConfirmCodeRepository,
+    MailService,
   ],
   controllers: [AuthController],
 })

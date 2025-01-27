@@ -7,13 +7,14 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { SignInDto, SignUpDto } from '@/modules/auth/dto';
+import { ConfirmMessageDto, SignInDto, SignUpDto } from '@/modules/auth/dto';
 import { AuthDataService } from '@/modules/auth-data/auth-data.service';
 import { UserService } from '@/modules/user/user.service';
 import { JwtGuard } from '@/providers/jwt';
 import { TransactionInterceptor } from '@/common/interceptors';
 import { ConfirmCodeService } from '@/modules/confirm-code/confirm-code.service';
 import { ConfirmCodeTypeEnum } from '@/models/confirm-code';
+import { MailService } from '@/modules/mail/mail.service';
 
 @Controller('api/v1/auth')
 export class AuthController {
@@ -21,6 +22,7 @@ export class AuthController {
     readonly authDataService: AuthDataService,
     readonly userService: UserService,
     readonly confirmCodeService: ConfirmCodeService,
+    readonly mailService: MailService,
   ) {}
 
   @Post('sign-up')
@@ -37,6 +39,23 @@ export class AuthController {
     await this.authDataService.signUp(body);
     await this.userService.create(body);
     return true;
+  }
+  @Post('sign-up/confirm-message')
+  @UseInterceptors(TransactionInterceptor)
+  async signUpConfirmMessage(@Body() body: ConfirmMessageDto) {
+    const code = await this.confirmCodeService.create({
+      destination: body.destination,
+      type: ConfirmCodeTypeEnum.REGISTRATION,
+    });
+
+    await this.mailService.sendMessage(
+      {
+        email: body.destination,
+        type: ConfirmCodeTypeEnum.REGISTRATION,
+      },
+      code,
+    );
+    return code;
   }
 
   @Post('sign-in')

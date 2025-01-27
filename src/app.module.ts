@@ -5,6 +5,7 @@ import { CommonModule } from '@/common/common.module';
 import { AuthDataModule } from './modules/auth-data/auth-data.module';
 import { UserModule } from './modules/user/user.module';
 import { ConfirmCodeModule } from './modules/confirm-code/confirm-code.module';
+import { MailModule } from './modules/mail/mail.module';
 
 // Configuration
 
@@ -20,6 +21,7 @@ import { ConfirmCodeModule } from './modules/confirm-code/confirm-code.module';
     AuthDataModule,
     UserModule,
     ConfirmCodeModule,
+    MailModule,
   ],
   providers: [],
 })
