@@ -7,10 +7,15 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ConfirmMessageDto, SignInDto, SignUpDto } from '@/modules/auth/dto';
+import {
+  ConfirmMessageDto,
+  ResetPasswordDto,
+  SignInDto,
+  SignUpDto,
+} from '@/modules/auth/dto';
 import { AuthDataService } from '@/modules/auth-data/auth-data.service';
 import { UserService } from '@/modules/user/user.service';
-import { JwtGuard } from '@/providers/jwt';
+import { JwtGuard, PasswordGuard } from '@/providers/jwt';
 import { TransactionInterceptor } from '@/common/interceptors';
 import { ConfirmCodeService } from '@/modules/confirm-code/confirm-code.service';
 import { ConfirmCodeTypeEnum } from '@/models/confirm-code';
@@ -56,6 +61,30 @@ export class AuthController {
       code,
     );
     return code;
+  }
+  @Post('reset-password')
+  @UseGuards(PasswordGuard)
+  async resetPassword(@Req() req, @Body() body: ResetPasswordDto) {
+    return await this.authDataService.updatePassword({
+      login: req.user.login,
+      password: body.password,
+    });
+  }
+
+  @Post('reset-password/confirm-message')
+  @UseInterceptors(TransactionInterceptor)
+  async resetPasswordConfirmMessage(@Body() body: ConfirmMessageDto) {
+    const code = await this.confirmCodeService.create({
+      destination: body.destination,
+      type: ConfirmCodeTypeEnum.UPDATE_PASSWORD,
+    });
+
+    const link = await this.authDataService.createResetPasswordLink(code);
+    await this.mailService.sendMessage(
+      { email: body.destination, type: ConfirmCodeTypeEnum.UPDATE_PASSWORD },
+      { link },
+    );
+    return true;
   }
 
   @Post('sign-in')

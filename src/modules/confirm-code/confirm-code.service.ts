@@ -23,7 +23,7 @@ export class ConfirmCodeService {
     },
     [ConfirmCodeTypeEnum.UPDATE_PASSWORD]: {
       mask: '######',
-      timeLive: 360,
+      timeLive: 600,
       timeDelay: 120,
     },
   };

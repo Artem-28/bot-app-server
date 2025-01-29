@@ -44,4 +44,13 @@ export class AuthDataRepository
 
     return !!result.affected;
   }
+
+  public async exist(login: string) {
+    const repository = this.getRepository(AuthDataEntity);
+    const query = new HQueryBuilder(repository, {
+      filter: { field: 'login', value: login },
+    });
+
+    return await query.builder.getExists();
+  }
 }
