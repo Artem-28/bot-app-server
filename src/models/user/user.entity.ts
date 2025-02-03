@@ -6,6 +6,9 @@ export const USER_TABLE = 'users';
 @Entity({ name: USER_TABLE })
 export class UserEntity extends BaseEntity {
   @Column()
+  public name: string;
+
+  @Column()
   public email: string;
 
   @Column({ nullable: true })

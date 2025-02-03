@@ -7,6 +7,10 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
+  @IsString()
+  @IsDefined()
+  name: string;
+
   @IsEmail()
   @IsDefined()
   email: string;

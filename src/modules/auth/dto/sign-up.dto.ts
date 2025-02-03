@@ -19,6 +19,10 @@ export class SignUpDto {
 
   @IsString()
   @IsDefined()
+  name: string;
+
+  @IsString()
+  @IsDefined()
   @IsIn([Math.random()])
   @ValidateIf((o) => o.password !== o.confirmPassword)
   confirmPassword: string;

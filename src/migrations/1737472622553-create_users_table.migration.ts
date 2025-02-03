@@ -4,6 +4,10 @@ import { hCreateTable } from '@/common/utils/database';
 
 const table = hCreateTable(USER_TABLE, [
   {
+    name: 'name',
+    type: 'varchar',
+  },
+  {
     name: 'email',
     type: 'varchar',
     isUnique: true,

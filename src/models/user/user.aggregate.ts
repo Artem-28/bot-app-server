@@ -12,6 +12,10 @@ import { IUser } from '@/models/user';
 import { BaseAggregate } from '@/models/base';
 
 export class UserAggregate extends BaseAggregate implements IUser {
+  @IsString()
+  @IsDefined()
+  name: string;
+
   @IsEmail()
   @IsDefined()
   email: string;
@@ -49,6 +53,7 @@ export class UserAggregate extends BaseAggregate implements IUser {
 
   get instance(): IUser {
     return {
+      name: this.name,
       email: this.email,
       phone: this.phone,
       emailVerifiedAt: this.emailVerifiedAt,

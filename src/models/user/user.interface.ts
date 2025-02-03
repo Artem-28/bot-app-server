@@ -1,6 +1,8 @@
 import { IBase } from '@/models/base';
 
 export interface IUser extends IBase {
+  /** Имя пользователя */
+  name: string;
   /** Email пользователя */
   email: string;
 
