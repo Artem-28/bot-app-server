@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthDataAggregate } from '@/models/auth-data';
 import { AuthDataDto, UpdatePasswordDto } from '@/modules/auth-data/dto';
 import { SignInDto } from '@/modules/auth/dto';
-import { CommonError } from '@/common/error';
+import { CommonError, errors } from '@/common/error';
 import { JwtService } from '@nestjs/jwt';
 import { IToken } from '@/common/types';
 import { IConfirmCode } from '@/models/confirm-code';
@@ -32,9 +32,7 @@ export class AuthDataService {
     const authData = await this._authDataRepository.getOne(dto.email);
     if (!authData && throwException) {
       throw new CommonError({
-        field: 'email',
-        ctx: 'field',
-        message: 'errors.sing_in.email.invalid',
+        messages: errors.sign_in.data_invalid,
       });
     }
     if (!authData) return null;
@@ -42,11 +40,7 @@ export class AuthDataService {
     const passwordMatch = await bcrypt.compare(dto.password, authData.password);
 
     if (!passwordMatch && throwException) {
-      throw new CommonError({
-        field: 'email',
-        ctx: 'field',
-        message: 'errors.sing_in.email.invalid',
-      });
+      throw new CommonError({ messages: errors.sign_in.data_invalid });
     }
     if (!passwordMatch) return null;
 
@@ -58,11 +52,7 @@ export class AuthDataService {
       hashToken: null,
     });
     if (!success && throwException) {
-      throw new CommonError({
-        field: null,
-        ctx: 'app',
-        message: 'errors.logout.error',
-      });
+      throw new CommonError({ messages: errors.logout.base });
     }
     return success;
   }
@@ -70,11 +60,7 @@ export class AuthDataService {
   public async updatePassword(dto: UpdatePasswordDto, throwException = false) {
     const authData = await this._authDataRepository.getOne(dto.login);
     if (!authData && throwException) {
-      throw new CommonError({
-        field: null,
-        ctx: 'field',
-        message: 'errors.email.not_registered',
-      });
+      throw new CommonError({ messages: errors.user.not_exist });
     }
     if (!authData) return false;
 
@@ -85,11 +71,7 @@ export class AuthDataService {
     });
 
     if (!success && throwException) {
-      throw new CommonError({
-        field: null,
-        ctx: 'app',
-        message: 'errors.reset_password.base_error',
-      });
+      throw new CommonError({ messages: errors.update_password.base });
     }
 
     return success;
@@ -101,11 +83,7 @@ export class AuthDataService {
   ) {
     const exist = await this._authDataRepository.exist(code.destination);
     if (!exist && throwException) {
-      throw new CommonError({
-        field: null,
-        ctx: 'field',
-        message: 'errors.email.not_registered',
-      });
+      throw new CommonError({ messages: errors.user.not_exist });
     }
     if (!exist) return '';
     const expiresIn = this.expiresTokenPassword(code.liveAt);
@@ -143,11 +121,7 @@ export class AuthDataService {
       hashToken,
     });
     if (!success && throwException) {
-      throw new CommonError({
-        field: null,
-        ctx: 'app',
-        message: 'errors.issue_token.error',
-      });
+      throw new CommonError({ messages: errors.sign_in.base });
     }
     if (!success) return token;
     token.accessToken = accessToken;

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from '@/repositories/user';
 import { CreateUserDto } from '@/modules/user/dto';
-import { CommonError } from '@/common/error';
+import { CommonError, errors } from '@/common/error';
 import { IUser, UserAggregate } from '@/models/user';
 import { FilterDto } from '@/common/dto';
 
@@ -11,11 +11,7 @@ export class UserService {
 
   public async create(dto: CreateUserDto): Promise<UserAggregate> {
     if (!dto.licenseAgreement) {
-      throw new CommonError({
-        field: 'licenseAgreement',
-        ctx: 'field',
-        message: 'errors.registration.licenseAgreement',
-      });
+      throw new CommonError({ messages: errors.sign_up.license_agreement });
     }
 
     const userAggregate = UserAggregate.create(dto);
@@ -30,14 +26,7 @@ export class UserService {
   ): Promise<UserAggregate | null> {
     const user = await this._userRepository.getOne(filter);
     if (!user && throwException) {
-      throw new CommonError(
-        {
-          field: null,
-          ctx: 'app',
-          message: 'errors.user.not_found',
-        },
-        400,
-      );
+      throw new CommonError({ messages: errors.user.not_exist });
     }
 
     return user;

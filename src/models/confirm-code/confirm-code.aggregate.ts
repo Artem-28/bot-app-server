@@ -1,7 +1,6 @@
 import {
   ConfirmCodeTypeEnum,
   IConfirmCode,
-  TValidateCodeField,
 } from '@/models/confirm-code/confirm-code.interface';
 import {
   IsBoolean,
@@ -14,9 +13,8 @@ import {
   IsString,
   validateSync,
 } from 'class-validator';
-import { CommonError, DomainError } from '@/common/error';
+import { DomainError } from '@/common/error';
 import { Exclude, Expose } from 'class-transformer';
-import { hToArray } from '@/common/utils/formatter';
 
 export class ConfirmCodeAggregate implements IConfirmCode {
   /** Идентификатор кода */
@@ -68,7 +66,7 @@ export class ConfirmCodeAggregate implements IConfirmCode {
     _confirmCode.updatedAt = data?.id ? new Date() : _confirmCode.updatedAt;
     const errors = validateSync(_confirmCode, { whitelist: true });
     if (!!errors.length) {
-      throw new DomainError(errors, { message: 'ConfirmCode not valid ' });
+      throw new DomainError(errors);
     }
     return _confirmCode;
   }

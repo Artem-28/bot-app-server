@@ -11,7 +11,7 @@ import {
 } from '@/models/confirm-code';
 import { ConfirmCodeRepository } from '@/repositories/confirm-code';
 import { hGenerateCode } from '@/common/utils/generator';
-import { CommonError } from '@/common/error';
+import { CommonError, errors } from '@/common/error';
 
 @Injectable()
 export class ConfirmCodeService {
@@ -48,11 +48,7 @@ export class ConfirmCodeService {
     }
 
     if (code.delay) {
-      throw new CommonError({
-        message: 'errors.confirm_code.delay',
-        ctx: 'field',
-        field: 'code',
-      });
+      throw new CommonError({ messages: errors.confirm_code.delay });
     }
     code.update({ value: hGenerateCode(mask) });
     code.setLiveTime(timeLive);
@@ -62,11 +58,7 @@ export class ConfirmCodeService {
       code.instance,
     );
     if (!updated) {
-      throw new CommonError({
-        message: 'errors.confirm_code.create',
-        ctx: 'app',
-        field: null,
-      });
+      throw new CommonError({ messages: errors.confirm_code.create });
     }
 
     return code;
@@ -81,9 +73,8 @@ export class ConfirmCodeService {
       { field: 'type', value: dto.type },
     ]);
 
-    console.log('GET CODE', code, dto);
-
-    const throwException = Array.isArray(throwExceptionField) && !!throwExceptionField.length;
+    const throwException =
+      Array.isArray(throwExceptionField) && !!throwExceptionField.length;
 
     const validate: IValidateCodeResponse = {
       matched: false,
@@ -92,11 +83,7 @@ export class ConfirmCodeService {
     };
 
     if (!code && throwException) {
-      throw new CommonError({
-        message: 'errors.confirm_code.matched_invalid',
-        ctx: 'field',
-        field: 'code',
-      });
+      throw new CommonError({ messages: errors.confirm_code.matched });
     }
 
     if (!code) return validate;
@@ -107,19 +94,16 @@ export class ConfirmCodeService {
 
     if (!throwException) return validate;
 
-    console.log('CODE', code);
-    console.log('VALIDATE', validate);
+    const messages = [];
 
     throwExceptionField.forEach((field) => {
       const valid = validate[field];
-      if (!valid) {
-        throw new CommonError({
-          ctx: 'field',
-          field: 'code',
-          message: `errors.confirm_code.${field}_invalid`,
-        });
-      }
+      if (!valid) messages.push(errors.confirm_code[field]);
     });
+
+    if (messages.length) {
+      throw new CommonError({ messages });
+    }
 
     return validate;
   }

@@ -1,5 +1,5 @@
 import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
-import { ResponseFactory, SuccessResponse } from '@/common/response';
+import { SuccessResponse } from '@/common/response';
 import { map, Observable } from 'rxjs';
 
 export class ResponseInterceptor<T>
@@ -13,6 +13,6 @@ export class ResponseInterceptor<T>
       .handle()
       .pipe<
         SuccessResponse<T>
-      >(map((data) => ResponseFactory.success<T>(data, context)));
+      >(map((data) => SuccessResponse.create<T>(data, context)));
   }
 }

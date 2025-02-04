@@ -3,7 +3,7 @@ import { ConfirmCodeTypeEnum } from '@/models/confirm-code';
 import { ConfigService } from '@nestjs/config';
 import { SendMessageDto } from '@/modules/mail/dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { CommonError } from '@/common/error';
+import { CommonError, errors } from '@/common/error';
 
 @Injectable()
 export class MailService {
@@ -33,15 +33,7 @@ export class MailService {
         context: context,
       });
     } catch (e) {
-      console.log('ERROR', e);
-      throw new CommonError(
-        {
-          ctx: 'app',
-          field: null,
-          message: `errors.mail.send_message.${dto.type}`,
-        },
-        400,
-      );
+      throw new CommonError({ messages: errors.mail.send_message[dto.type] });
     }
   }
 }

@@ -32,7 +32,7 @@ export class AuthDataAggregate extends BaseAggregate implements IAuthData {
     _entity.updatedAt = data?.id ? new Date() : _entity.updatedAt;
     const errors = validateSync(_entity, { whitelist: true });
     if (!!errors.length) {
-      throw new DomainError(errors, { message: 'AuthData not valid ' });
+      throw new DomainError(errors);
     }
     return _entity;
   }

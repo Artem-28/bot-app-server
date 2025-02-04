@@ -1,14 +1,30 @@
-import { BaseResponse } from '@/common/response/base.response';
 import { ArgumentsHost } from '@nestjs/common';
-import { getExceptionErrors, getExceptionStatus, IError } from '@/common/error';
+import { IResponse } from '@/common/response/respomse.interface';
+import { ExceptionAggregate, IException } from '@/common/error';
 
-export class ErrorResponse extends BaseResponse {
-  public errors: IError[];
+export class ErrorResponse implements IResponse {
+  path: string;
+  success: boolean;
+  statusCode: number;
+  errors: IException[] = [];
+  messages: string[] = [];
 
-  constructor(exception: any, host: ArgumentsHost) {
-    super(host);
-    this.errors = getExceptionErrors(exception);
-    this.statusCode = getExceptionStatus(exception);
-    this.success = false;
+  static create(exception: any, host: ArgumentsHost) {
+    console.log('EXCEPTION', exception);
+    const response = new ErrorResponse();
+
+    const error = ExceptionAggregate.create(exception);
+    const errorResponse = error.getResponse();
+
+    const ctx = host.switchToHttp();
+    const ctxRequest = ctx.getRequest();
+
+    response.errors = errorResponse.errors;
+    response.messages = errorResponse.messages;
+    response.statusCode = error.getStatus();
+    response.path = ctxRequest.route.path;
+    response.success = response.statusCode <= 201;
+
+    return response;
   }
 }

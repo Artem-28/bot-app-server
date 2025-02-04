@@ -46,7 +46,7 @@ export class UserAggregate extends BaseAggregate implements IUser {
     _user.updatedAt = data?.id ? new Date() : _user.updatedAt;
     const errors = validateSync(_user, { whitelist: true });
     if (!!errors.length) {
-      throw new DomainError(errors, { message: 'User not valid ' });
+      throw new DomainError(errors);
     }
     return _user;
   }
