@@ -76,6 +76,7 @@ export class HQueryBuilder<T> {
 
   public filter(filter: HQueryBuilderFilter | HQueryBuilderFilter[]) {
     hToArray(filter).forEach((dto) => {
+      if (Array.isArray(dto.value) && !dto.value.length) return;
       const f = new QueryBuilderFilter(dto, this._alias);
       if (!this._whereFilter) {
         this._whereFilter = f;

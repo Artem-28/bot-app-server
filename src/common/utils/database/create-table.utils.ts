@@ -1,9 +1,17 @@
-import { TableColumn, Table, TableColumnOptions } from 'typeorm';
+import {
+  TableColumn,
+  Table,
+  TableColumnOptions,
+  TableOptions,
+  TableUniqueOptions,
+  TableUnique,
+} from 'typeorm';
 
 export interface HCreateTableOptions {
   columnId: boolean;
   columnCreatedAt: boolean;
   columnUpdatedAt: boolean;
+  uniques: Array<string[]>;
 }
 
 export type HCreateTable = (
@@ -18,7 +26,12 @@ export type HCreateTableColumns = (
 
 export const hCreateTable: HCreateTable = (name, columns, options?) => {
   const opt = Object.assign<HCreateTableOptions, Partial<HCreateTableColumns>>(
-    { columnId: true, columnCreatedAt: true, columnUpdatedAt: true },
+    {
+      columnId: true,
+      columnCreatedAt: true,
+      columnUpdatedAt: true,
+      uniques: [],
+    },
     options,
   );
   if (opt.columnId) {
@@ -45,7 +58,26 @@ export const hCreateTable: HCreateTable = (name, columns, options?) => {
       onUpdate: 'CURRENT_TIMESTAMP',
     });
   }
-  return new Table({ name: name, columns: hCreateTableColumns(columns) });
+  const tableOptions: TableOptions = {
+    name,
+    columns: hCreateTableColumns(columns),
+  };
+
+  const uniques: TableUniqueOptions[] = [];
+  opt.uniques.forEach((keys) => {
+    uniques.push(
+      new TableUnique({
+        name: `${name}_${keys.join('_')}`,
+        columnNames: keys,
+      }),
+    );
+  });
+
+  if (uniques.length) {
+    tableOptions.uniques = uniques;
+  }
+
+  return new Table(tableOptions);
 };
 
 export const hCreateTableColumns: HCreateTableColumns = (options) => {

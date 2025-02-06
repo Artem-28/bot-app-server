@@ -8,5 +8,7 @@ export class FilterDto<T> {
 
   @IsDefined()
   @IsNotEmpty()
-  value: string | number;
+  value: string | number | string[] | number[];
+
+  operator?: 'and' | 'or';
 }
