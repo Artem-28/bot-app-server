@@ -5,7 +5,7 @@ export abstract class ProjectRepositoryDomain {
   abstract create(project: IProject): Promise<ProjectAggregate>;
   abstract update(
     id: number,
-    data: Partial<Pick<IProject, 'title'>>,
+    data: Partial<IProject>,
   ): Promise<boolean>;
 
   abstract getOne(

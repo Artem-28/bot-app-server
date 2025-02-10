@@ -3,7 +3,17 @@ import {
   PermissionType,
 } from '@/providers/permission/permission.type';
 
-export const PROJECT_VIEW: AccessController = {
+export const PROJECT_UPDATE: AccessController = {
+  permissions: [PermissionType.OWNER],
+  operator: 'or',
+};
+
+export const PROJECT_CHANGE_OWNER: AccessController = {
+  permissions: [PermissionType.OWNER],
+  operator: 'or',
+};
+
+export const PROJECT_INFO: AccessController = {
   permissions: [PermissionType.OWNER, PermissionType.SUBSCRIBER],
   operator: 'or',
 };

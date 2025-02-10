@@ -15,8 +15,12 @@ import {
 } from 'class-validator';
 import { DomainError } from '@/common/error';
 import { Exclude, Expose } from 'class-transformer';
+import { BaseAggregate } from '@/models/base';
 
-export class ConfirmCodeAggregate implements IConfirmCode {
+export class ConfirmCodeAggregate
+  extends BaseAggregate<IConfirmCode>
+  implements IConfirmCode
+{
   /** Идентификатор кода */
   @Exclude()
   @IsOptional()

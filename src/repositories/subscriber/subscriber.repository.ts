@@ -10,7 +10,7 @@ import {
 } from '@/models/subscriber';
 import { FilterDto } from '@/common/dto';
 import { HQueryBuilder } from '@/common/utils/database';
-import {ProjectAggregate, ProjectEntity} from "@/models/project";
+import { ProjectAggregate, ProjectEntity } from '@/models/project';
 
 @Injectable()
 export class SubscriberRepository
@@ -53,5 +53,27 @@ export class SubscriberRepository
     const result = await query.builder.getOne();
     if (!result) return null;
     return SubscriberAggregate.create(result);
+  }
+
+  async remove(id: number): Promise<boolean> {
+    const result = await this.getRepository(ProjectEntity)
+      .createQueryBuilder()
+      .delete()
+      .where({ id })
+      .execute();
+
+    return !!result.affected;
+  }
+
+  async unsubscribe(
+    data: Pick<ISubscriber, 'projectId' | 'userId'>,
+  ): Promise<boolean> {
+    const result = await this.getRepository(SubscriberEntity)
+      .createQueryBuilder()
+      .delete()
+      .where({ userId: data.userId })
+      .andWhere({ projectId: data.projectId })
+      .execute();
+    return !!result.affected;
   }
 }

@@ -10,4 +10,7 @@ export abstract class SubscriberRepositoryDomain {
   abstract getMany(
     filter: FilterDto<ISubscriber> | FilterDto<ISubscriber>[],
   ): Promise<SubscriberAggregate[]>;
+  abstract unsubscribe(
+    data: Pick<ISubscriber, 'projectId' | 'userId'>,
+  ): Promise<boolean>;
 }

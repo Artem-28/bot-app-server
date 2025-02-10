@@ -15,7 +15,10 @@ import {
 } from '@/models/subscriber/subscriber.interface';
 import { IUser } from '@/models/user';
 
-export class SubscriberAggregate extends BaseAggregate implements ISubscriber {
+export class SubscriberAggregate
+  extends BaseAggregate<ISubscriber>
+  implements ISubscriber
+{
   @IsDefined()
   @IsNumber()
   userId: number;
@@ -46,7 +49,10 @@ export class SubscriberAggregate extends BaseAggregate implements ISubscriber {
   }
 }
 
-export class SubscriberUser extends BaseAggregate implements ISubscriberUser {
+export class SubscriberUser
+  extends BaseAggregate<ISubscriberUser>
+  implements ISubscriberUser
+{
   @IsDefined()
   @IsNumber()
   projectId: number;

@@ -1,23 +1,24 @@
-import {
-  IsDate,
-  IsDefined,
-  IsNumber,
-  IsOptional,
-  IsString,
-  validateSync,
-} from 'class-validator';
+import { IsDefined, IsNumber, IsString, validateSync } from 'class-validator';
 import { DomainError } from '@/common/error';
 import { IProject } from '@/models/project/project.interface';
 import { BaseAggregate } from '@/models/base';
+import { IUser } from '@/models/user';
+import { Exclude } from 'class-transformer';
 
-export class ProjectAggregate extends BaseAggregate implements IProject {
+export class ProjectAggregate
+  extends BaseAggregate<IProject>
+  implements IProject
+{
   @IsDefined()
   @IsNumber()
+  @Exclude()
   ownerId: number;
 
   @IsDefined()
   @IsString()
   title: string;
+
+  owner: Partial<IUser>;
 
   static create(data: Partial<IProject>) {
     const _project = new ProjectAggregate();
@@ -27,7 +28,14 @@ export class ProjectAggregate extends BaseAggregate implements IProject {
     if (!!errors.length) {
       throw new DomainError(errors);
     }
+
+    Object.assign(_project, { owner: { id: _project.ownerId } });
     return _project;
+  }
+
+  public setOwner(user: IUser) {
+    this.ownerId = user.id;
+    Object.assign(this.owner, user);
   }
 
   get instance(): IProject {

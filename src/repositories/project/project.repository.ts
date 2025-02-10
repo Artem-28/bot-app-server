@@ -34,7 +34,7 @@ export class ProjectRepository
 
   async update(
     id: number,
-    data: Partial<Pick<IProject, 'title'>>,
+    data: Partial<IProject>,
   ): Promise<boolean> {
     const result = await this.getRepository(ProjectEntity)
       .createQueryBuilder()
