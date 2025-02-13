@@ -1,4 +1,11 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { PermissionService } from '@/modules/permission/permission.service';
 
-@Controller('permission')
-export class PermissionController {}
+@Controller('api/v1/permissions')
+export class PermissionController {
+  constructor(readonly permissionService: PermissionService) {}
+  @Get()
+  async list() {
+    return await this.permissionService.list();
+  }
+}

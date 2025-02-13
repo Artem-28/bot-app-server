@@ -1,38 +1,32 @@
-import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { IOrder, IPagination, MapObject } from '@/common/types';
 import { hToArray } from '@/common/utils/formatter';
-
-export interface HQueryBuilderOptions {
-  alias?: string;
-  order?: IOrder | IOrder[];
-  filter?: HQueryBuilderFilter | HQueryBuilderFilter[];
-  pagination?: IPagination;
-}
-
-export interface HQueryBuilderFilter {
-  field: string;
-  value?: any | any[];
-  operator?: 'and' | 'or';
-  callback?: (filter: HQueryBuilderOptions) => Brackets;
-}
+import {
+  BuilderFilterDto,
+  BuilderOptionsDto,
+  BuilderRelationDto,
+  BuilderRelationMethod,
+} from '@/common/utils/database/dto';
 
 export class HQueryBuilder<T> {
   private readonly _repository: Repository<T>;
   private readonly _alias: string;
   private _builder: SelectQueryBuilder<T>;
-  private _whereFilter: QueryBuilderFilter | null = null;
-  private _andFilters: MapObject<QueryBuilderFilter> = {};
-  private _orFilters: MapObject<QueryBuilderFilter> = {};
+  private _whereFilter: QueryBuilderFilter<T> | null = null;
+  private _andFilters: MapObject<QueryBuilderFilter<T>> = {};
+  private _orFilters: MapObject<QueryBuilderFilter<T>> = {};
+  private _relation: MapObject<QueryBuilderRelation> = {};
   private _orders: IOrder[] = [];
   private _pagination?: IPagination;
 
-  constructor(repository: Repository<T>, options?: HQueryBuilderOptions) {
-    const { alias, order, pagination, filter } = options;
+  constructor(repository: Repository<T>, options?: BuilderOptionsDto<T>) {
+    const { alias, order, pagination, filter, relation } = options;
     this._repository = repository;
     this._alias = alias || 'entity';
     this.order(order);
     this.pagination(pagination);
     this.filter(filter);
+    this.relation(relation);
   }
 
   get builder() {
@@ -42,9 +36,16 @@ export class HQueryBuilder<T> {
 
   private _setupBuilder() {
     this._builder = this._repository.createQueryBuilder(this._alias);
+    this._setupRelation();
     this._setupFilter();
     this._setupPagination();
     this._setupOrder();
+  }
+
+  private _setupRelation() {
+    Object.values(this._relation).forEach((relation) =>
+      relation.set(this._builder),
+    );
   }
 
   private _setupOrder() {
@@ -74,7 +75,14 @@ export class HQueryBuilder<T> {
     this._pagination = pagination;
   }
 
-  public filter(filter: HQueryBuilderFilter | HQueryBuilderFilter[]) {
+  public relation(relation: BuilderRelationDto | BuilderRelationDto[]) {
+    hToArray(relation).forEach((dto) => {
+      const r = new QueryBuilderRelation(dto, this._alias);
+      this._relation[r.name] = r;
+    });
+  }
+
+  public filter(filter: BuilderFilterDto<T> | BuilderFilterDto<T>[]) {
     hToArray(filter).forEach((dto) => {
       if (Array.isArray(dto.value) && !dto.value.length) return;
       const f = new QueryBuilderFilter(dto, this._alias);
@@ -91,10 +99,37 @@ export class HQueryBuilder<T> {
   }
 }
 
-export class QueryBuilderFilter {
-  private readonly _filter: HQueryBuilderFilter;
+export class QueryBuilderRelation {
+  private readonly _relation: BuilderRelationDto;
   private readonly _alias: string;
-  constructor(filter: HQueryBuilderFilter, alias: string) {
+  constructor(relation: BuilderRelationDto, alias: string) {
+    this._relation = relation;
+    this._alias = alias || '';
+  }
+
+  get name(): string {
+    return this._alias
+      ? `${this._alias}.${this._relation.name}`
+      : this._relation.name;
+  }
+
+  private get _method(): BuilderRelationMethod {
+    return this._relation.method || 'leftJoin';
+  }
+
+  private get _relationAlias(): string {
+    return this._relation.alias || this._relation.name;
+  }
+
+  public set<T>(builder: SelectQueryBuilder<T>) {
+    builder[this._method](this.name, this._relationAlias);
+  }
+}
+
+export class QueryBuilderFilter<T> {
+  private readonly _filter: BuilderFilterDto<T>;
+  private readonly _alias: string;
+  constructor(filter: BuilderFilterDto<T>, alias: string) {
     this._filter = filter;
     this._alias = alias || '';
   }
@@ -109,14 +144,14 @@ export class QueryBuilderFilter {
 
   get value(): MapObject<string> {
     if (this._filter.value === null) return {};
-    const dataField = this._filter.field.split('.');
+    const dataField = String(this._filter.field).split('.');
     const field = dataField[dataField.length - 1];
     return { [field]: this._filter.value };
   }
 
   private get _filterAlias(): string {
     let alias = this._alias;
-    const dataField = this._filter.field.split('.');
+    const dataField = String(this._filter.field).split('.');
     const field = dataField[dataField.length - 1];
     if (dataField.length > 1) {
       alias = dataField[dataField.length - 2];
@@ -125,7 +160,7 @@ export class QueryBuilderFilter {
   }
 
   private get _valueAlias(): string {
-    const dataField = this._filter.field.split('.');
+    const dataField = String(this._filter.field).split('.');
     const field = dataField[dataField.length - 1];
     if (Array.isArray(this._filter.value)) return ` (:...${field})`;
     if (this._filter.value === null) return '';
@@ -139,7 +174,7 @@ export class QueryBuilderFilter {
   }
 
   private _setOr<T>(builder: SelectQueryBuilder<T>) {
-    if (typeof this._filter.callback === 'function') {
+    if (this._filter.callback && typeof this._filter.callback === 'function') {
       builder.andWhere(this._filter.callback(this));
       return;
     }
