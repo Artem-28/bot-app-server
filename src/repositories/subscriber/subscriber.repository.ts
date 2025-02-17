@@ -69,4 +69,10 @@ export class SubscriberRepository
     const result = await query.builder.execute();
     return !!result.affected;
   }
+
+  async exist(options?: BuilderOptionsDto<ISubscriber>): Promise<boolean> {
+    const repository = this.getRepository(SubscriberEntity);
+    const query = HQueryBuilder.select(repository, options);
+    return await query.builder.getExists();
+  }
 }

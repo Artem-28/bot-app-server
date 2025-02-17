@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UserPermissionRepository } from '@/repositories/user-permission';
-import { updatePermissionDto } from '@/modules/permission/dto';
+import {
+  GetPermissionDto,
+  updatePermissionDto,
+} from '@/modules/permission/dto';
 import { UserPermissionAggregate } from '@/models/user-permission';
 import { CommonError, errors } from '@/common/error';
 
@@ -28,6 +31,24 @@ export class PermissionService {
       throw new CommonError({ messages: errors.permissions.update });
     }
     const permissions = await this._userPermissionRepository.save(data);
-    return permissions;
+    return {
+      projectId: dto.projectId,
+      userId: dto.userId,
+      permissions: permissions.map((p) => p.code),
+    };
+  }
+
+  public async list(dto: GetPermissionDto) {
+    const permissions = await this._userPermissionRepository.getMany({
+      filter: [
+        { field: 'projectId', value: dto.projectId },
+        { field: 'userId', value: dto.userId },
+      ],
+    });
+    return {
+      projectId: dto.projectId,
+      userId: dto.userId,
+      permissions: permissions.map((p) => p.code),
+    };
   }
 }

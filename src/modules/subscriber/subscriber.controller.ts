@@ -1,13 +1,13 @@
 import { Body, Controller, Post, UseGuards, Req, Param } from '@nestjs/common';
 import { SubscriberService } from '@/modules/subscriber/subscriber.service';
 import { JwtGuard } from '@/providers/jwt';
-import { SubscribeDto } from '@/modules/subscriber/dto-controller';
 import {
   Permission,
   PermissionGuard,
   SUBSCRIBER_CREATE,
 } from '@/providers/permission';
 import { CommonError, errors } from '@/common/error';
+import { SubscribeDto } from '@/modules/subscriber/dto';
 
 @Controller('api/v1/projects/:projectId/subscribers')
 @UseGuards(JwtGuard)

@@ -8,7 +8,11 @@ import {
   UserPermissionAggregate,
   UserPermissionEntity,
 } from '@/models/user-permission';
-import { BuilderFilterDto, HQueryBuilder } from '@/common/utils/builder';
+import {
+  BuilderFilterDto,
+  BuilderOptionsDto,
+  HQueryBuilder,
+} from '@/common/utils/builder';
 
 @Injectable()
 export class UserPermissionRepository
@@ -35,5 +39,14 @@ export class UserPermissionRepository
     const repository = this.getRepository(UserPermissionEntity);
     const query = HQueryBuilder.delete(repository, { filter });
     return await query.builder.execute();
+  }
+
+  async getMany(
+    options?: BuilderOptionsDto<IUserPermission>,
+  ): Promise<UserPermissionAggregate[]> {
+    const repository = this.getRepository(UserPermissionEntity);
+    const query = HQueryBuilder.select(repository, options);
+    const result = await query.builder.getMany();
+    return result.map((item) => UserPermissionAggregate.create(item));
   }
 }

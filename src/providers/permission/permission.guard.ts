@@ -10,12 +10,16 @@ import {
 import { ProjectAggregate, ProjectEntity } from '@/models/project';
 import { ParamsDto } from '@/common/dto';
 import { HQueryBuilder } from '@/common/utils/builder';
+import { UserPermissionEntity } from '@/models/user-permission';
+import { IUser } from '@/models/user';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
   private _access: AccessController;
   private _params: ParamsDto;
   private _project: ProjectAggregate;
+  private _permissions: AccessPermission[] = [];
+  private _authUser: IUser;
   constructor(
     private readonly _reflector: Reflector,
     private readonly _dataSource: DataSource,
@@ -32,9 +36,8 @@ export class PermissionGuard implements CanActivate {
 
   private getParams(ctx: ExecutionContext): ParamsDto {
     const request = ctx.switchToHttp().getRequest();
-    return Object.entries(
-      Object.assign({ userId: request.user.id }, request.params),
-    ).reduce((acc, [key, value]) => {
+    this._authUser = request.user;
+    return Object.entries(request.params).reduce((acc, [key, value]) => {
       acc[key] = Number(value);
       return acc;
     }, {}) as ParamsDto;
@@ -47,6 +50,8 @@ export class PermissionGuard implements CanActivate {
     await this.loadJoinProject();
     if (!this._project) return false;
 
+    await this.loadPermissions();
+
     const method = this._access.operator === 'and' ? 'every' : 'some';
     return this._access.permissions[method]((p) => this.checkPermission(p));
   }
@@ -56,12 +61,12 @@ export class PermissionGuard implements CanActivate {
       case PermissionType.OWNER:
         return this.checkProjectOwner();
       default:
-        return false;
+        return this._permissions.includes(permission);
     }
   }
 
   private checkProjectOwner() {
-    return this._project && this._project.ownerId === this._params.userId;
+    return this._project && this._project.ownerId === this._authUser.id;
   }
 
   private async loadJoinProject() {
@@ -79,5 +84,22 @@ export class PermissionGuard implements CanActivate {
     if (!project) return;
 
     this._project = ProjectAggregate.create(project);
+  }
+
+  private async loadPermissions() {
+    const { projectId } = this._params;
+    const permissions = this._access.permissions;
+    if (!projectId || !this._authUser || !permissions.length) return;
+    const repository =
+      this._dataSource.manager.getRepository(UserPermissionEntity);
+    const query = HQueryBuilder.select(repository, {
+      filter: [
+        { field: 'projectId', value: projectId },
+        { field: 'userId', value: this._authUser.id, operator: 'and' },
+        { field: 'code', value: permissions, operator: 'and' },
+      ],
+    });
+    const result = await query.builder.getMany();
+    this._permissions = result.map((p) => p.code);
   }
 }

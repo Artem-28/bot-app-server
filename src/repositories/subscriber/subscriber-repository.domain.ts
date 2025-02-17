@@ -12,4 +12,5 @@ export abstract class SubscriberRepositoryDomain {
   abstract unsubscribe(
     data: Pick<ISubscriber, 'projectId' | 'userId'>,
   ): Promise<boolean>;
+  abstract exist(options?: BuilderOptionsDto<ISubscriber>): Promise<boolean>;
 }
