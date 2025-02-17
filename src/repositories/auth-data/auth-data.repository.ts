@@ -8,7 +8,7 @@ import {
   AuthDataEntity,
   IAuthData,
 } from '@/models/auth-data';
-import { HQueryBuilder } from '@/common/utils/database';
+import { HQueryBuilder } from '@/common/utils/builder';
 
 export class AuthDataRepository
   extends BaseRepository
@@ -25,7 +25,7 @@ export class AuthDataRepository
 
   public async getOne(login: string) {
     const repository = this.getRepository(AuthDataEntity);
-    const query = new HQueryBuilder(repository, {
+    const query = HQueryBuilder.select(repository, {
       filter: { field: 'login', value: login },
     });
 
@@ -47,7 +47,7 @@ export class AuthDataRepository
 
   public async exist(login: string) {
     const repository = this.getRepository(AuthDataEntity);
-    const query = new HQueryBuilder(repository, {
+    const query = HQueryBuilder.select(repository, {
       filter: { field: 'login', value: login },
     });
 

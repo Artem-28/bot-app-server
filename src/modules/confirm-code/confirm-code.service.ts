@@ -31,10 +31,12 @@ export class ConfirmCodeService {
   public async create(dto: CreateConfirmCodeDto) {
     const { mask, timeDelay, timeLive } = this._codeOptions[dto.type];
 
-    const code = await this._confirmCodeRepository.getOne([
-      { field: 'destination', value: dto.destination },
-      { field: 'type', value: dto.type },
-    ]);
+    const code = await this._confirmCodeRepository.getOne({
+      filter: [
+        { field: 'destination', value: dto.destination },
+        { field: 'type', value: dto.type },
+      ],
+    });
 
     if (!code) {
       const newCode = ConfirmCodeAggregate.create({
@@ -68,10 +70,12 @@ export class ConfirmCodeService {
     dto: CheckConfirmCodeDto,
     throwExceptionField?: TValidateCodeField[],
   ) {
-    const code = await this._confirmCodeRepository.getOne([
-      { field: 'destination', value: dto.destination },
-      { field: 'type', value: dto.type },
-    ]);
+    const code = await this._confirmCodeRepository.getOne({
+      filter: [
+        { field: 'destination', value: dto.destination },
+        { field: 'type', value: dto.type },
+      ],
+    });
 
     const throwException =
       Array.isArray(throwExceptionField) && !!throwExceptionField.length;

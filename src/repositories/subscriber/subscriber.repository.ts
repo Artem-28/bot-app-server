@@ -8,9 +8,7 @@ import {
   SubscriberAggregate,
   SubscriberEntity,
 } from '@/models/subscriber';
-import { FilterDto } from '@/common/dto';
-import { HQueryBuilder } from '@/common/utils/database';
-import { ProjectAggregate, ProjectEntity } from '@/models/project';
+import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
 
 @Injectable()
 export class SubscriberRepository
@@ -21,23 +19,16 @@ export class SubscriberRepository
     super(dataSource, request);
   }
 
-  async insert(subscribers: ISubscriber | ISubscriber[]) {
-    const result =
-      await this.getRepository(SubscriberEntity).insert(subscribers);
-    console.log('INSERT RESULT', result);
-    return Promise.resolve([]);
-  }
-
   async create(subscriber: ISubscriber): Promise<SubscriberAggregate> {
     const result = await this.getRepository(SubscriberEntity).save(subscriber);
     return SubscriberAggregate.create(result);
   }
 
   async getMany(
-    filter: FilterDto<ISubscriber> | FilterDto<ISubscriber>[],
+    options?: BuilderOptionsDto<ISubscriber>,
   ): Promise<SubscriberAggregate[]> {
     const repository = this.getRepository(SubscriberEntity);
-    const query = new HQueryBuilder(repository, { filter: filter });
+    const query = HQueryBuilder.select(repository, options);
 
     const result = await query.builder.getMany();
     if (!result) return null;
@@ -45,10 +36,10 @@ export class SubscriberRepository
   }
 
   async getOne(
-    filter: FilterDto<ISubscriber> | FilterDto<ISubscriber>[],
+    options?: BuilderOptionsDto<ISubscriber>,
   ): Promise<SubscriberAggregate | null> {
     const repository = this.getRepository(SubscriberEntity);
-    const query = new HQueryBuilder(repository, { filter: filter });
+    const query = HQueryBuilder.select(repository, options);
 
     const result = await query.builder.getOne();
     if (!result) return null;
@@ -56,24 +47,32 @@ export class SubscriberRepository
   }
 
   async remove(id: number): Promise<boolean> {
-    const result = await this.getRepository(ProjectEntity)
-      .createQueryBuilder()
-      .delete()
-      .where({ id })
-      .execute();
+    const repository = this.getRepository(SubscriberEntity);
+    const query = HQueryBuilder.delete(repository, {
+      filter: { field: 'id', value: id },
+    });
 
+    const result = await query.builder.execute();
     return !!result.affected;
   }
 
   async unsubscribe(
     data: Pick<ISubscriber, 'projectId' | 'userId'>,
   ): Promise<boolean> {
-    const result = await this.getRepository(SubscriberEntity)
-      .createQueryBuilder()
-      .delete()
-      .where({ userId: data.userId })
-      .andWhere({ projectId: data.projectId })
-      .execute();
+    const repository = this.getRepository(SubscriberEntity);
+    const query = HQueryBuilder.delete(repository, {
+      filter: [
+        { field: 'userId', value: data.userId },
+        { field: 'projectId', value: data.projectId, operator: 'and' },
+      ],
+    });
+    const result = await query.builder.execute();
     return !!result.affected;
+  }
+
+  async exist(options?: BuilderOptionsDto<ISubscriber>): Promise<boolean> {
+    const repository = this.getRepository(SubscriberEntity);
+    const query = HQueryBuilder.select(repository, options);
+    return await query.builder.getExists();
   }
 }

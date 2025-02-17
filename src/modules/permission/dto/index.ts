@@ -1,1 +1,2 @@
-export * from './params.dto';
+export * from './update-permission.dto';
+export * from './get-permission.dto';

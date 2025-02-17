@@ -1,13 +1,21 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { PermissionService } from './permission.service';
 import { PermissionController } from './permission.controller';
-import { ProjectRepository } from '@/repositories/project';
+import { PermissionRepository } from '@/repositories/permission';
+import { UserPermissionRepository } from '@/repositories/user-permission';
+import { SubscriberService } from '@/modules/subscriber/subscriber.service';
 import { SubscriberRepository } from '@/repositories/subscriber';
+import { UserRepository } from '@/repositories/user';
 
-@Global()
 @Module({
-  providers: [PermissionService, ProjectRepository, SubscriberRepository],
+  providers: [
+    PermissionService,
+    PermissionRepository,
+    UserPermissionRepository,
+    SubscriberService,
+    SubscriberRepository,
+    UserRepository,
+  ],
   controllers: [PermissionController],
-  exports: [PermissionService],
 })
 export class PermissionModule {}

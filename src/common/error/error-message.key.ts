@@ -34,6 +34,10 @@ export const errors = {
   },
   subscriber: {
     owner_project: 'errors.subscriber.owner_project', // Невозможно добавить подписчика, так как он является владельцеп проекта
+    not_exist: 'errors.subscriber.not_exist',
+  },
+  permissions: {
+    update: 'errors.permissions.update', // Ошибка при обновлении прав пользователя
   },
   validators: {
     is_defined: 'errors.validators.is_defined', // Поле обязательно

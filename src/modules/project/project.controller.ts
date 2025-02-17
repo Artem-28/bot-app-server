@@ -24,11 +24,15 @@ import {
   UpdateProjectBodyDto,
 } from '@/modules/project/dto';
 import { TransactionInterceptor } from '@/common/interceptors';
+import { PermissionService } from '@/modules/permission/permission.service';
 
 @Controller('api/v1/projects')
 @UseGuards(JwtGuard)
 export class ProjectController {
-  constructor(readonly projectService: ProjectService) {}
+  constructor(
+    readonly projectService: ProjectService,
+    readonly permissionService: PermissionService,
+  ) {}
 
   @Post()
   public async create(@Req() req, @Body() body: CreateProjectBodyDto) {

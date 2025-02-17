@@ -30,8 +30,7 @@ export class ProjectService {
   public async update(dto: UpdateProjectDto) {
     const { projectId, ...payload } = dto;
     const project = await this._projectRepository.getOne({
-      field: 'id',
-      value: projectId,
+      filter: { field: 'id', value: projectId },
     });
 
     if (!project) {
@@ -60,8 +59,7 @@ export class ProjectService {
   public async changeOwner(dto: ChangeOwnerDto) {
     // Получаем нового владельца проекта
     const user = await this._userRepository.getOne({
-      field: 'email',
-      value: dto.ownerEmail,
+      filter: { field: 'email', value: dto.ownerEmail },
     });
 
     // Если нет такого пользователя возвращаем ошибку
@@ -71,8 +69,7 @@ export class ProjectService {
 
     // Получаем проект
     const project = await this._projectRepository.getOne({
-      field: 'id',
-      value: dto.projectId,
+      filter: { field: 'id', value: dto.projectId },
     });
 
     // Если такого проекта нет возвращаем ошибку
@@ -106,8 +103,7 @@ export class ProjectService {
 
   public async info(id: number, throwException = false) {
     const project = await this._projectRepository.getOne({
-      field: 'id',
-      value: id,
+      filter: { field: 'id', value: id },
     });
     if (!project && throwException) {
       throw new CommonError({
@@ -117,8 +113,7 @@ export class ProjectService {
     }
 
     const user = await this._userRepository.getOne({
-      field: 'id',
-      value: project.ownerId,
+      filter: { field: 'id', value: project.ownerId },
     });
 
     if (user) project.setOwner(user);
@@ -128,15 +123,16 @@ export class ProjectService {
 
   public async viewProjects(userId: number) {
     const subscribers = await this._subscriberRepository.getMany({
-      field: 'userId',
-      value: userId,
+      filter: { field: 'userId', value: userId },
     });
 
     const projectIds = subscribers.map((subscriber) => subscriber.projectId);
 
-    return await this._projectRepository.getMany([
-      { field: 'id', value: projectIds },
-      { field: 'ownerId', value: userId, operator: 'or' },
-    ]);
+    return await this._projectRepository.getMany({
+      filter: [
+        { field: 'id', value: projectIds },
+        { field: 'ownerId', value: userId, operator: 'or' },
+      ],
+    });
   }
 }

@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { SubscriberRepository } from '@/repositories/subscriber';
 import { UserRepository } from '@/repositories/user';
-import { CreateSubscriberDto } from '@/modules/subscriber/dto';
+import {
+  CreateSubscriberDto,
+  ExistSubscriberDto,
+} from '@/modules/subscriber/dto';
 import { CommonError, errors } from '@/common/error';
 import { SubscriberAggregate, SubscriberUser } from '@/models/subscriber';
 
@@ -14,8 +17,7 @@ export class SubscriberService {
 
   public async create(dto: CreateSubscriberDto, throwException = false) {
     const user = await this._userRepository.getOne({
-      field: 'email',
-      value: dto.email,
+      filter: { field: 'email', value: dto.email },
     });
 
     if (!user && throwException) {
@@ -32,5 +34,19 @@ export class SubscriberService {
     );
 
     return SubscriberUser.create(subscriber, user);
+  }
+
+  public async checkExist(dto: ExistSubscriberDto, throwException = false) {
+    const exist = await this._subscriberRepository.exist({
+      filter: [
+        { field: 'projectId', value: dto.projectId },
+        { field: 'userId', value: dto.userId },
+      ],
+    });
+
+    if (!exist && throwException) {
+      throw new CommonError({ messages: errors.subscriber.not_exist });
+    }
+    return exist;
   }
 }
