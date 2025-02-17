@@ -1,5 +1,5 @@
 import { Brackets } from 'typeorm';
-import { IsDefined, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDefined, IsOptional, IsString } from 'class-validator';
 import { IOrder, IPagination } from '@/common/types';
 
 export class BuilderOptionsDto<T> {
@@ -18,6 +18,10 @@ export class BuilderOptionsDto<T> {
 
   @IsOptional()
   relation?: BuilderRelationDto | BuilderRelationDto[];
+
+  @IsOptional()
+  @IsBoolean()
+  deleteBuilder?: boolean;
 }
 
 export class BuilderFilterDto<T> {

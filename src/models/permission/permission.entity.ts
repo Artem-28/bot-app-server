@@ -7,6 +7,7 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { PermissionEnum } from '@/providers/permission';
+import { UserPermissionEntity } from '@/models/user-permission';
 
 export const PERMISSION_TABLE = 'permissions';
 
@@ -34,6 +35,9 @@ export class PermissionEntity {
 
   @OneToMany(() => PermissionEntity, (permission) => permission.parent)
   public children: PermissionEntity[];
+
+  @OneToMany(() => UserPermissionEntity, (permission) => permission.permission)
+  public userPermissions: UserPermissionEntity[];
 
   @ManyToOne(() => PermissionEntity, (permission) => permission.children, {
     onDelete: 'CASCADE',

@@ -32,10 +32,7 @@ export class ProjectRepository
     return ProjectAggregate.create(result);
   }
 
-  async update(
-    id: number,
-    data: Partial<IProject>,
-  ): Promise<boolean> {
+  async update(id: number, data: Partial<IProject>): Promise<boolean> {
     const result = await this.getRepository(ProjectEntity)
       .createQueryBuilder()
       .update()

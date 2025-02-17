@@ -6,7 +6,7 @@ export class ChangeOwnerBodyDto {
   ownerEmail: string;
 }
 
-export class ChangeOwnerDto extends ChangeOwnerBodyDto{
+export class ChangeOwnerDto extends ChangeOwnerBodyDto {
   @IsDefined()
   @IsNumber()
   projectId: number;

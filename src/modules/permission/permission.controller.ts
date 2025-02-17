@@ -1,11 +1,18 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Param, Body, Put } from '@nestjs/common';
 import { PermissionService } from '@/modules/permission/permission.service';
+import { updatePermissionBodyDto } from '@/modules/permission/dto';
 
-@Controller('api/v1/permissions')
+@Controller('api/v1/projects/:projectId/users/:userId/permissions')
 export class PermissionController {
   constructor(readonly permissionService: PermissionService) {}
-  @Get()
-  async list() {
-    return await this.permissionService.list();
+
+  @Put()
+  async update(@Param() params, @Body() body: updatePermissionBodyDto) {
+    console.log('update permissions', params, body);
+    return await this.permissionService.update({
+      projectId: Number(params.projectId),
+      userId: Number(params.userId),
+      permissions: body.permissions,
+    });
   }
 }

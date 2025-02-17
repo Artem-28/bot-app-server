@@ -1,4 +1,4 @@
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { DeleteQueryBuilder, Repository, SelectQueryBuilder } from 'typeorm';
 import { IOrder, IPagination, MapObject } from '@/common/types';
 import { hToArray } from '@/common/utils/formatter';
 import {
@@ -10,19 +10,26 @@ import {
 
 export class HQueryBuilder<T> {
   private readonly _repository: Repository<T>;
-  private readonly _alias: string;
-  private _builder: SelectQueryBuilder<T>;
+  private readonly _alias: string | null = null;
+  private _builder: DeleteQueryBuilder<T> | SelectQueryBuilder<T>;
   private _whereFilter: QueryBuilderFilter<T> | null = null;
   private _andFilters: MapObject<QueryBuilderFilter<T>> = {};
   private _orFilters: MapObject<QueryBuilderFilter<T>> = {};
   private _relation: MapObject<QueryBuilderRelation> = {};
   private _orders: IOrder[] = [];
   private _pagination?: IPagination;
+  private _deleteBuilder: boolean = false;
 
   constructor(repository: Repository<T>, options?: BuilderOptionsDto<T>) {
-    const { alias, order, pagination, filter, relation } = options;
+    const { alias, order, pagination, filter, relation, deleteBuilder } =
+      options;
     this._repository = repository;
     this._alias = alias || 'entity';
+    if (deleteBuilder) {
+      this._deleteBuilder = true;
+      this._alias = null;
+    }
+
     this.order(order);
     this.pagination(pagination);
     this.filter(filter);
@@ -30,16 +37,15 @@ export class HQueryBuilder<T> {
   }
 
   get builder() {
-    this._setupBuilder();
-    return this._builder;
-  }
-
-  private _setupBuilder() {
     this._builder = this._repository.createQueryBuilder(this._alias);
+    if (this._deleteBuilder) {
+      this._builder = this._repository.createQueryBuilder().delete();
+    }
     this._setupRelation();
     this._setupFilter();
     this._setupPagination();
     this._setupOrder();
+    return this._builder;
   }
 
   private _setupRelation() {
@@ -50,12 +56,14 @@ export class HQueryBuilder<T> {
 
   private _setupOrder() {
     this._orders.forEach(({ sort, order, nulls }) => {
+      if (this._builder instanceof DeleteQueryBuilder) return;
       this._builder.addOrderBy(sort, order, nulls);
     });
   }
 
   private _setupPagination() {
-    if (!this._pagination) return;
+    if (!this._pagination || this._builder instanceof DeleteQueryBuilder)
+      return;
     const { skip, take } = this._pagination;
     this._builder.take(take).skip(skip);
   }
@@ -121,7 +129,7 @@ export class QueryBuilderRelation {
     return this._relation.alias || this._relation.name;
   }
 
-  public set<T>(builder: SelectQueryBuilder<T>) {
+  public set<T>(builder: SelectQueryBuilder<T> | DeleteQueryBuilder<T>) {
     builder[this._method](this.name, this._relationAlias);
   }
 }
@@ -139,6 +147,7 @@ export class QueryBuilderFilter<T> {
   }
 
   get field(): string {
+    console.log('ALIAS', this._filterAlias);
     return `${this._filterAlias}${this._operator}${this._valueAlias}`;
   }
 
@@ -156,7 +165,7 @@ export class QueryBuilderFilter<T> {
     if (dataField.length > 1) {
       alias = dataField[dataField.length - 2];
     }
-    return `${alias}.${field}`;
+    return alias ? `${alias}.${field}` : field;
   }
 
   private get _valueAlias(): string {
@@ -173,7 +182,7 @@ export class QueryBuilderFilter<T> {
     return ' =';
   }
 
-  private _setOr<T>(builder: SelectQueryBuilder<T>) {
+  private _setOr<T>(builder: SelectQueryBuilder<T> | DeleteQueryBuilder<T>) {
     if (this._filter.callback && typeof this._filter.callback === 'function') {
       builder.andWhere(this._filter.callback(this));
       return;
@@ -181,7 +190,7 @@ export class QueryBuilderFilter<T> {
     builder.orWhere(this.field, this.value);
   }
 
-  private _setAnd<T>(builder: SelectQueryBuilder<T>) {
+  private _setAnd<T>(builder: SelectQueryBuilder<T> | DeleteQueryBuilder<T>) {
     if (typeof this._filter.callback === 'function') {
       builder.andWhere(this._filter.callback(this));
       return;
@@ -189,7 +198,7 @@ export class QueryBuilderFilter<T> {
     builder.andWhere(this.field, this.value);
   }
 
-  public setWhere<T>(builder: SelectQueryBuilder<T>) {
+  public setWhere<T>(builder: SelectQueryBuilder<T> | DeleteQueryBuilder<T>) {
     if (typeof this._filter.callback === 'function') {
       builder.andWhere(this._filter.callback(this));
       return;
@@ -197,7 +206,7 @@ export class QueryBuilderFilter<T> {
     builder.where(this.field, this.value);
   }
 
-  public set<T>(builder: SelectQueryBuilder<T>) {
+  public set<T>(builder: SelectQueryBuilder<T> | DeleteQueryBuilder<T>) {
     if (this._filter.operator === 'or') {
       this._setOr(builder);
       return;
