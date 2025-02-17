@@ -2,10 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/repositories/base.repository';
 import { DataSource } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
-import {
-  BuilderOptionsDto,
-  HQueryBuilder,
-} from '@/common/utils/database';
+import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
 import { PermissionRepositoryDomain } from '@/repositories/permission/permission-repository.domain';
 import {
   IPermission,
@@ -26,7 +23,7 @@ export class PermissionRepository
     options: BuilderOptionsDto<IPermission>,
   ): Promise<PermissionAggregate[]> {
     const repository = this.getRepository(PermissionEntity);
-    const query = new HQueryBuilder(repository, options);
+    const query = HQueryBuilder.select(repository, options);
     const result = await query.builder.getMany();
     return result.map((item) => PermissionAggregate.create(item));
   }

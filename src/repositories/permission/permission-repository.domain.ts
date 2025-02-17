@@ -1,5 +1,5 @@
 import { IPermission, PermissionAggregate } from '@/models/permission';
-import { BuilderOptionsDto } from '@/common/utils/database';
+import { BuilderOptionsDto } from '@/common/utils/builder';
 
 export abstract class PermissionRepositoryDomain {
   abstract getMany(

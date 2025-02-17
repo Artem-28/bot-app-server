@@ -1,14 +1,13 @@
 import { ISubscriber, SubscriberAggregate } from '@/models/subscriber';
-import { FilterDto } from '@/common/dto';
+import { BuilderOptionsDto } from '@/common/utils/builder';
 
 export abstract class SubscriberRepositoryDomain {
-  abstract insert(subscribers: ISubscriber | ISubscriber[]);
   abstract create(subscriber: ISubscriber): Promise<SubscriberAggregate>;
   abstract getOne(
-    filter: FilterDto<ISubscriber> | FilterDto<ISubscriber>[],
+    options?: BuilderOptionsDto<ISubscriber>,
   ): Promise<SubscriberAggregate | null>;
   abstract getMany(
-    filter: FilterDto<ISubscriber> | FilterDto<ISubscriber>[],
+    options?: BuilderOptionsDto<ISubscriber>,
   ): Promise<SubscriberAggregate[]>;
   abstract unsubscribe(
     data: Pick<ISubscriber, 'projectId' | 'userId'>,

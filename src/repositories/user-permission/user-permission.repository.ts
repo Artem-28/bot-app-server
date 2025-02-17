@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/repositories/base.repository';
-import { DataSource } from 'typeorm';
+import { DataSource, DeleteResult } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { UserPermissionRepositoryDomain } from '@/repositories/user-permission/user-permission-repository.domain';
 import {
@@ -8,7 +8,7 @@ import {
   UserPermissionAggregate,
   UserPermissionEntity,
 } from '@/models/user-permission';
-import { BuilderFilterDto, HQueryBuilder } from '@/common/utils/database';
+import { BuilderFilterDto, HQueryBuilder } from '@/common/utils/builder';
 
 @Injectable()
 export class UserPermissionRepository
@@ -31,14 +31,9 @@ export class UserPermissionRepository
     filter:
       | BuilderFilterDto<IUserPermission>
       | BuilderFilterDto<IUserPermission>[],
-  ): Promise<boolean> {
+  ): Promise<DeleteResult> {
     const repository = this.getRepository(UserPermissionEntity);
-    const query = new HQueryBuilder(repository, {
-      filter,
-      deleteBuilder: true,
-    });
-    const result = await query.builder.execute();
-    console.log('DELETE RESULT', result);
-    return true;
+    const query = HQueryBuilder.delete(repository, { filter });
+    return await query.builder.execute();
   }
 }

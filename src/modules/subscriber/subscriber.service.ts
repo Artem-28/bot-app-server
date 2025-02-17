@@ -14,8 +14,7 @@ export class SubscriberService {
 
   public async create(dto: CreateSubscriberDto, throwException = false) {
     const user = await this._userRepository.getOne({
-      field: 'email',
-      value: dto.email,
+      filter: { field: 'email', value: dto.email },
     });
 
     if (!user && throwException) {

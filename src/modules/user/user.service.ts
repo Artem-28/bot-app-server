@@ -24,7 +24,7 @@ export class UserService {
     filter: FilterDto<IUser>,
     throwException = false,
   ): Promise<UserAggregate | null> {
-    const user = await this._userRepository.getOne(filter);
+    const user = await this._userRepository.getOne({ filter });
     if (!user && throwException) {
       throw new CommonError({ messages: errors.user.not_exist });
     }

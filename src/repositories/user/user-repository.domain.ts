@@ -1,9 +1,9 @@
 import { IUser, UserAggregate } from '@/models/user';
-import { FilterDto } from '@/common/dto';
+import { BuilderOptionsDto } from '@/common/utils/builder';
 
 export abstract class UserRepositoryDomain {
   abstract create(user: IUser): Promise<UserAggregate>;
   abstract getOne(
-    filter: FilterDto<IUser> | FilterDto<IUser>[],
+    options?: BuilderOptionsDto<IUser>,
   ): Promise<UserAggregate | null>;
 }

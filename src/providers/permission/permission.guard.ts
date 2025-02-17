@@ -8,8 +8,8 @@ import {
   PermissionType,
 } from '@/providers/permission/permission.type';
 import { ProjectAggregate, ProjectEntity } from '@/models/project';
-import { HQueryBuilder } from '@/common/utils/database';
 import { ParamsDto } from '@/common/dto';
+import { HQueryBuilder } from '@/common/utils/builder';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -71,7 +71,7 @@ export class PermissionGuard implements CanActivate {
     const repository =
       await this._dataSource.manager.getRepository(ProjectEntity);
 
-    const query = new HQueryBuilder(repository, {
+    const query = HQueryBuilder.select(repository, {
       filter: { field: 'id', value: projectId },
     });
 
