@@ -4,8 +4,7 @@ import { DataSource } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { UserRepositoryDomain } from '@/repositories/user';
 import { IUser, UserAggregate, UserEntity } from '@/models/user';
-import { FilterDto } from '@/common/dto';
-import { HQueryBuilder } from '@/common/utils/database';
+import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
 
 @Injectable()
 export class UserRepository
@@ -22,10 +21,10 @@ export class UserRepository
   }
 
   public async getOne(
-    filter: FilterDto<IUser> | FilterDto<IUser>[],
+    options?: BuilderOptionsDto<IUser>,
   ): Promise<UserAggregate | null> {
     const repository = this.getRepository(UserEntity);
-    const query = new HQueryBuilder(repository, { filter: filter });
+    const query = HQueryBuilder.select(repository, options);
 
     const result = await query.builder.getOne();
     if (!result) return null;

@@ -6,6 +6,10 @@ import { AuthDataModule } from './modules/auth-data/auth-data.module';
 import { UserModule } from './modules/user/user.module';
 import { ConfirmCodeModule } from './modules/confirm-code/confirm-code.module';
 import { MailModule } from './modules/mail/mail.module';
+import { ProjectModule } from './modules/project/project.module';
+import { PermissionModule } from './modules/permission/permission.module';
+import { SubscriberModule } from './modules/subscriber/subscriber.module';
+import { ResourceModule } from './modules/resource/resource.module';
 
 // Configuration
 
@@ -22,6 +26,10 @@ import { MailModule } from './modules/mail/mail.module';
     UserModule,
     ConfirmCodeModule,
     MailModule,
+    ProjectModule,
+    PermissionModule,
+    SubscriberModule,
+    ResourceModule,
   ],
   providers: [],
 })

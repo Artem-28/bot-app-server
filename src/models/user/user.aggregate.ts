@@ -11,7 +11,7 @@ import { DomainError } from '@/common/error';
 import { IUser } from '@/models/user';
 import { BaseAggregate } from '@/models/base';
 
-export class UserAggregate extends BaseAggregate implements IUser {
+export class UserAggregate extends BaseAggregate<IUser> implements IUser {
   @IsString()
   @IsDefined()
   name: string;

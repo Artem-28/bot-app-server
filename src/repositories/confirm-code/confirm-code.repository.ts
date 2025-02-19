@@ -3,13 +3,12 @@ import { DataSource } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { ConfirmCodeRepositoryDomain } from '@/repositories/confirm-code';
 import { BaseRepository } from '@/repositories/base.repository';
-import { FilterDto } from '@/common/dto';
 import {
   ConfirmCodeAggregate,
   IConfirmCode,
   ConfirmCodeEntity,
 } from '@/models/confirm-code';
-import { HQueryBuilder } from '@/common/utils/database';
+import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ConfirmCodeRepository
@@ -42,10 +41,10 @@ export class ConfirmCodeRepository
   }
 
   public async getOne(
-    filter: FilterDto<IConfirmCode> | FilterDto<IConfirmCode>[],
+    options?: BuilderOptionsDto<IConfirmCode>,
   ): Promise<ConfirmCodeAggregate | null> {
     const repository = this.getRepository(ConfirmCodeEntity);
-    const query = new HQueryBuilder(repository, { filter: filter });
+    const query = HQueryBuilder.select(repository, options);
 
     const result = await query.builder.getOne();
     if (!result) return null;
@@ -53,11 +52,12 @@ export class ConfirmCodeRepository
   }
 
   public async remove(id: number): Promise<boolean> {
-    const result = await this.getRepository(ConfirmCodeEntity)
-      .createQueryBuilder()
-      .delete()
-      .where({ id })
-      .execute();
+    const repository = this.getRepository(ConfirmCodeEntity);
+    const query = HQueryBuilder.delete(repository, {
+      filter: { field: 'id', value: id },
+    });
+
+    const result = await query.builder.execute();
     return !!result.affected;
   }
 }

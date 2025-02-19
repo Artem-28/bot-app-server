@@ -9,6 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors) => new DomainError(errors),
+      whitelist: true,
     }),
   );
   const config = await app.get<ConfigService>(ConfigService);

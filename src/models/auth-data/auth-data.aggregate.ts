@@ -10,7 +10,10 @@ import { BaseAggregate } from '@/models/base';
 import { Exclude } from 'class-transformer';
 import { DomainError } from '@/common/error';
 
-export class AuthDataAggregate extends BaseAggregate implements IAuthData {
+export class AuthDataAggregate
+  extends BaseAggregate<IAuthData>
+  implements IAuthData
+{
   @IsString()
   @IsNotEmpty()
   @IsDefined()
