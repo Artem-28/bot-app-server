@@ -2,7 +2,10 @@ import {
   IUserPermission,
   UserPermissionAggregate,
 } from '@/models/user-permission';
-import { BuilderFilterDto, BuilderOptionsDto } from '@/common/utils/builder';
+import {
+  BuilderOptionsDto,
+  DeleteBuilderOptions,
+} from '@/common/utils/builder';
 import { DeleteResult } from 'typeorm';
 
 export abstract class UserPermissionRepositoryDomain {
@@ -11,9 +14,7 @@ export abstract class UserPermissionRepositoryDomain {
   ): Promise<UserPermissionAggregate[]>;
 
   abstract remove(
-    filter:
-      | BuilderFilterDto<IUserPermission>
-      | BuilderFilterDto<IUserPermission>[],
+    options?: DeleteBuilderOptions<IUserPermission>,
   ): Promise<DeleteResult>;
 
   abstract getMany(

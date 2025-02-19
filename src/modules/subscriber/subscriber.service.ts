@@ -6,7 +6,11 @@ import {
   ExistSubscriberDto,
 } from '@/modules/subscriber/dto';
 import { CommonError, errors } from '@/common/error';
-import { SubscriberAggregate, SubscriberUser } from '@/models/subscriber';
+import {
+  ISubscriber,
+  SubscriberAggregate,
+  SubscriberUser,
+} from '@/models/subscriber';
 
 @Injectable()
 export class SubscriberService {

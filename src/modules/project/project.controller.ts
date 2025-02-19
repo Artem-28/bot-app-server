@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   Patch,
+  Delete,
   Req,
   UseGuards,
   UseInterceptors,
@@ -16,6 +17,7 @@ import {
   PermissionGuard,
   PROJECT_CHANGE_OWNER,
   PROJECT_INFO,
+  PROJECT_REMOVE,
   PROJECT_UPDATE,
 } from '@/providers/permission';
 import {
@@ -41,7 +43,13 @@ export class ProjectController {
 
   @Get()
   public async list(@Req() req) {
-    return await this.projectService.viewProjects(Number(req.user.id));
+    const userId = Number(req.user.id);
+    const readProjectPermissions =
+      await this.permissionService.getReadProjectPermissions(userId);
+    return await this.projectService.viewProjects({
+      ownerId: userId,
+      readProjectPermissions,
+    });
   }
 
   @Get(':projectId')
@@ -64,6 +72,14 @@ export class ProjectController {
     });
   }
 
+  @Delete(':projectId')
+  @UseGuards(PermissionGuard)
+  @Permission(PROJECT_REMOVE)
+  public async remove( @Param('projectId') projectId,) {
+    // TODO доделать удаления подписчиков и прав
+    return await this.projectService.remove(Number(projectId));
+  }
+
   @Patch(':projectId/change-owner')
   @UseGuards(PermissionGuard)
   @Permission(PROJECT_CHANGE_OWNER)
@@ -72,9 +88,16 @@ export class ProjectController {
     @Param('projectId') projectId,
     @Body() body: ChangeOwnerBodyDto,
   ) {
-    return await this.projectService.changeOwner({
+    const project = await this.projectService.changeOwner({
       projectId: Number(projectId),
       ...body,
     });
+    await this.permissionService.update({
+      projectId: project.id,
+      userId: project.ownerId,
+      permissions: [],
+    });
+
+    return project;
   }
 }

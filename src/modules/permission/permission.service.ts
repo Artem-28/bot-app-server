@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { UserPermissionRepository } from '@/repositories/user-permission';
 import {
   GetPermissionDto,
-  updatePermissionDto,
+  UpdatePermissionDto,
 } from '@/modules/permission/dto';
 import { UserPermissionAggregate } from '@/models/user-permission';
 import { CommonError, errors } from '@/common/error';
+import { PermissionEnum } from '@/providers/permission';
 
 @Injectable()
 export class PermissionService {
@@ -13,7 +14,9 @@ export class PermissionService {
     private readonly _userPermissionRepository: UserPermissionRepository,
   ) {}
 
-  public async update(dto: updatePermissionDto) {
+  public async update(dto: UpdatePermissionDto) {
+    let permissions: UserPermissionAggregate[] = [];
+
     const data = dto.permissions.map((code) =>
       UserPermissionAggregate.create({
         projectId: dto.projectId,
@@ -22,15 +25,21 @@ export class PermissionService {
       }),
     );
 
-    const removed = await this._userPermissionRepository.remove([
-      { field: 'projectId', value: dto.projectId },
-      { field: 'userId', value: dto.userId, operator: 'and' },
-    ]);
+    const removed = await this._userPermissionRepository.remove({
+      filter: [
+        { field: 'projectId', value: dto.projectId },
+        { field: 'userId', value: dto.userId, operator: 'and' },
+      ],
+    });
 
     if (!removed) {
       throw new CommonError({ messages: errors.permissions.update });
     }
-    const permissions = await this._userPermissionRepository.save(data);
+
+    if (data.length) {
+      permissions = await this._userPermissionRepository.save(data);
+    }
+
     return {
       projectId: dto.projectId,
       userId: dto.userId,
@@ -50,5 +59,23 @@ export class PermissionService {
       userId: dto.userId,
       permissions: permissions.map((p) => p.code),
     };
+  }
+
+  public async getReadProjectPermissions(userId: number) {
+    return await this._userPermissionRepository.getMany({
+      filter: [
+        { field: 'userId', value: userId },
+        { field: 'code', value: PermissionEnum.READ_PROJECT },
+      ],
+    });
+  }
+
+  public async remove(dto: UpdatePermissionDto) {
+    return await this._userPermissionRepository.remove({
+      filter: [
+        { field: 'projectId', value: dto.projectId },
+        { field: 'userId', value: dto.userId, operator: 'and' },
+      ],
+    });
   }
 }

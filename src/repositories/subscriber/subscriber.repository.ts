@@ -8,7 +8,11 @@ import {
   SubscriberAggregate,
   SubscriberEntity,
 } from '@/models/subscriber';
-import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
+import {
+  BuilderOptionsDto,
+  DeleteBuilderOptions,
+  HQueryBuilder,
+} from '@/common/utils/builder';
 
 @Injectable()
 export class SubscriberRepository
@@ -46,11 +50,9 @@ export class SubscriberRepository
     return SubscriberAggregate.create(result);
   }
 
-  async remove(id: number): Promise<boolean> {
+  async remove(options?: DeleteBuilderOptions<ISubscriber>): Promise<boolean> {
     const repository = this.getRepository(SubscriberEntity);
-    const query = HQueryBuilder.delete(repository, {
-      filter: { field: 'id', value: id },
-    });
+    const query = HQueryBuilder.delete(repository, options);
 
     const result = await query.builder.execute();
     return !!result.affected;

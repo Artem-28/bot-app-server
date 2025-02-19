@@ -1,10 +1,11 @@
 import {
   AccessController,
+  PermissionEnum,
   PermissionType,
 } from '@/providers/permission/permission.type';
 
 export const PROJECT_UPDATE: AccessController = {
-  permissions: [PermissionType.OWNER],
+  permissions: [PermissionType.OWNER, PermissionEnum.WRITE_PROJECT],
   operator: 'or',
 };
 
@@ -14,6 +15,11 @@ export const PROJECT_CHANGE_OWNER: AccessController = {
 };
 
 export const PROJECT_INFO: AccessController = {
+  permissions: [PermissionType.OWNER, PermissionEnum.READ_PROJECT],
+  operator: 'or',
+};
+
+export const PROJECT_REMOVE: AccessController = {
   permissions: [PermissionType.OWNER],
   operator: 'or',
 };

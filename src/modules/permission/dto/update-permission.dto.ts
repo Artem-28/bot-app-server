@@ -1,7 +1,7 @@
 import { PermissionEnum } from '@/providers/permission';
 import { IsArray, IsDefined, IsNumber } from 'class-validator';
 
-export class updatePermissionDto {
+export class UpdatePermissionDto {
   @IsDefined()
   @IsNumber()
   projectId: number;

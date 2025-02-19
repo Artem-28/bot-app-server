@@ -4,11 +4,13 @@ import {
   ChangeOwnerDto,
   CreateProjectDto,
   UpdateProjectDto,
+  ViewProjectDto,
 } from '@/modules/project/dto';
 import { ProjectAggregate } from '@/models/project';
 import { CommonError, errors } from '@/common/error';
 import { SubscriberRepository } from '@/repositories/subscriber';
 import { UserRepository } from '@/repositories/user';
+import { PermissionEnum } from '@/providers/permission';
 
 @Injectable()
 export class ProjectService {
@@ -121,18 +123,33 @@ export class ProjectService {
     return project;
   }
 
-  public async viewProjects(userId: number) {
-    const subscribers = await this._subscriberRepository.getMany({
-      filter: { field: 'userId', value: userId },
-    });
+  public async viewProjects(dto: ViewProjectDto) {
+    const projectIds: number[] = [];
+    const viewPermissions = [PermissionEnum.READ_PROJECT];
+    dto.readProjectPermissions.forEach((permission) => {
+      const canProject =
+        viewPermissions.includes(permission.code) &&
+        permission.userId === dto.ownerId;
 
-    const projectIds = subscribers.map((subscriber) => subscriber.projectId);
+      if (!canProject) return;
+      projectIds.push(permission.projectId);
+    });
 
     return await this._projectRepository.getMany({
       filter: [
         { field: 'id', value: projectIds },
-        { field: 'ownerId', value: userId, operator: 'or' },
+        { field: 'ownerId', value: dto.ownerId, operator: 'or' },
       ],
     });
+  }
+
+  public async remove(projectId) {
+    const removed = await this._projectRepository.remove(projectId);
+    // Удаляем всех подписчиков на этом проекте
+    await this._subscriberRepository.remove({
+      filter: { field: 'projectId', value: projectId },
+    });
+
+    return removed;
   }
 }

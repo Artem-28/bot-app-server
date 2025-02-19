@@ -1,5 +1,8 @@
 import { ISubscriber, SubscriberAggregate } from '@/models/subscriber';
-import { BuilderOptionsDto } from '@/common/utils/builder';
+import {
+  BuilderOptionsDto,
+  DeleteBuilderOptions,
+} from '@/common/utils/builder';
 
 export abstract class SubscriberRepositoryDomain {
   abstract create(subscriber: ISubscriber): Promise<SubscriberAggregate>;
@@ -13,4 +16,8 @@ export abstract class SubscriberRepositoryDomain {
     data: Pick<ISubscriber, 'projectId' | 'userId'>,
   ): Promise<boolean>;
   abstract exist(options?: BuilderOptionsDto<ISubscriber>): Promise<boolean>;
+
+  abstract remove(
+    options?: DeleteBuilderOptions<ISubscriber>,
+  ): Promise<boolean>;
 }
