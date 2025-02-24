@@ -15,7 +15,7 @@ export const PROJECT_CHANGE_OWNER: AccessController = {
 };
 
 export const PROJECT_INFO: AccessController = {
-  permissions: [PermissionType.OWNER, PermissionEnum.READ_PROJECT],
+  permissions: [PermissionType.OWNER],
   operator: 'or',
 };
 

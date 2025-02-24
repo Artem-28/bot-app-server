@@ -6,7 +6,6 @@ import {
 } from '@/modules/permission/dto';
 import { UserPermissionAggregate } from '@/models/user-permission';
 import { CommonError, errors } from '@/common/error';
-import { PermissionEnum } from '@/providers/permission';
 
 @Injectable()
 export class PermissionService {
@@ -61,21 +60,18 @@ export class PermissionService {
     };
   }
 
-  public async getReadProjectPermissions(userId: number) {
-    return await this._userPermissionRepository.getMany({
-      filter: [
-        { field: 'userId', value: userId },
-        { field: 'code', value: PermissionEnum.READ_PROJECT },
-      ],
-    });
-  }
-
   public async remove(dto: UpdatePermissionDto) {
     return await this._userPermissionRepository.remove({
       filter: [
         { field: 'projectId', value: dto.projectId },
         { field: 'userId', value: dto.userId, operator: 'and' },
       ],
+    });
+  }
+
+  public async removeProjectPermissions(projectId: number | string) {
+    return await this._userPermissionRepository.remove({
+      filter: { field: 'projectId', value: projectId },
     });
   }
 }
