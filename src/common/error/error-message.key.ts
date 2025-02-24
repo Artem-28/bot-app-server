@@ -31,6 +31,7 @@ export const errors = {
   project: {
     not_found: 'errors.project.not_found',
     update: 'errors.project.update', // Ошибка при обновлении проекта
+    remove: 'errors.project.remove', // Ошибка при удалении проекта
   },
   subscriber: {
     owner_project: 'errors.subscriber.owner_project', // Невозможно добавить подписчика, так как он является владельцеп проекта

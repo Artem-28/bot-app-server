@@ -4,13 +4,11 @@ import {
   ChangeOwnerDto,
   CreateProjectDto,
   UpdateProjectDto,
-  ViewProjectDto,
 } from '@/modules/project/dto';
 import { ProjectAggregate } from '@/models/project';
 import { CommonError, errors } from '@/common/error';
 import { SubscriberRepository } from '@/repositories/subscriber';
 import { UserRepository } from '@/repositories/user';
-import { PermissionEnum } from '@/providers/permission';
 
 @Injectable()
 export class ProjectService {
@@ -81,10 +79,12 @@ export class ProjectService {
 
     // Устанавливаем нового владельца проекта
     project.setOwner(user);
-    const success = await this._projectRepository.update(
+    const result = await this._projectRepository.update(
       project.id,
       project.instance,
     );
+
+    const success = result.affected > 0;
 
     // Если не удалось обновить проект возвращаем ошибку
     if (!success) {
@@ -123,33 +123,40 @@ export class ProjectService {
     return project;
   }
 
-  public async viewProjects(dto: ViewProjectDto) {
-    const projectIds: number[] = [];
-    const viewPermissions = [PermissionEnum.READ_PROJECT];
-    dto.readProjectPermissions.forEach((permission) => {
-      const canProject =
-        viewPermissions.includes(permission.code) &&
-        permission.userId === dto.ownerId;
-
-      if (!canProject) return;
-      projectIds.push(permission.projectId);
+  public async viewProjects(userId: number) {
+    const subscribeProjects = await this._subscriberRepository.getMany({
+      filter: { field: 'userId', value: userId },
     });
+
+    const projectIds = subscribeProjects.map(
+      (subscriber) => subscriber.projectId,
+    );
 
     return await this._projectRepository.getMany({
       filter: [
         { field: 'id', value: projectIds },
-        { field: 'ownerId', value: dto.ownerId, operator: 'or' },
+        { field: 'ownerId', value: userId, operator: 'or' },
       ],
     });
   }
 
-  public async remove(projectId) {
-    const removed = await this._projectRepository.remove(projectId);
-    // Удаляем всех подписчиков на этом проекте
-    await this._subscriberRepository.remove({
-      filter: { field: 'projectId', value: projectId },
-    });
+  public async remove(projectId: string | number, throwException = false) {
+    projectId = Number(projectId);
+    const result = await this._projectRepository.remove(projectId);
 
-    return removed;
+    const success = result.affected > 0;
+
+    if (success) {
+      // Удаляем всех подписчиков на этом проекте
+      await this._subscriberRepository.remove({
+        filter: { field: 'projectId', value: projectId },
+      });
+    }
+
+    if (!success && throwException) {
+      throw new CommonError({ messages: errors.project.remove });
+    }
+
+    return success;
   }
 }

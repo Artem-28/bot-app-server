@@ -44,12 +44,7 @@ export class ProjectController {
   @Get()
   public async list(@Req() req) {
     const userId = Number(req.user.id);
-    const readProjectPermissions =
-      await this.permissionService.getReadProjectPermissions(userId);
-    return await this.projectService.viewProjects({
-      ownerId: userId,
-      readProjectPermissions,
-    });
+    return await this.projectService.viewProjects(userId);
   }
 
   @Get(':projectId')
@@ -75,9 +70,10 @@ export class ProjectController {
   @Delete(':projectId')
   @UseGuards(PermissionGuard)
   @Permission(PROJECT_REMOVE)
-  public async remove( @Param('projectId') projectId,) {
-    // TODO доделать удаления подписчиков и прав
-    return await this.projectService.remove(Number(projectId));
+  public async remove(@Param('projectId') projectId) {
+    const success = await this.projectService.remove(projectId, true);
+    await this.permissionService.removeProjectPermissions(projectId);
+    return success;
   }
 
   @Patch(':projectId/change-owner')

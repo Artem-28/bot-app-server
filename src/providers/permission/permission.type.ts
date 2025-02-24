@@ -3,7 +3,6 @@ export enum PermissionPrivateEnum {
 }
 
 export enum PermissionEnum {
-  READ_PROJECT = 'read_project',
   WRITE_PROJECT = 'write_project',
   ACCESS_SCRIPT = 'access_script',
   READ_SCRIPT = 'read_script',

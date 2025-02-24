@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/repositories/base.repository';
-import { DataSource } from 'typeorm';
+import {DataSource, DeleteResult, UpdateResult} from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { ProjectRepositoryDomain } from '@/repositories/project/project-repository.domain';
 import { IProject, ProjectAggregate, ProjectEntity } from '@/models/project';
@@ -31,24 +31,22 @@ export class ProjectRepository
     return ProjectAggregate.create(result);
   }
 
-  async update(id: number, data: Partial<IProject>): Promise<boolean> {
-    const result = await this.getRepository(ProjectEntity)
+  update(id: number, data: Partial<IProject>): Promise<UpdateResult> {
+    return this.getRepository(ProjectEntity)
       .createQueryBuilder()
       .update()
       .set(data)
       .where({ id })
       .execute();
-    return !!result.affected;
   }
 
-  async remove(id: number): Promise<boolean> {
+  remove(id: number): Promise<DeleteResult> {
     const repository = this.getRepository(ProjectEntity);
-    const query = HQueryBuilder.select(repository, {
+    const query = HQueryBuilder.delete(repository, {
       filter: { field: 'id', value: id },
     });
 
-    const result = await query.builder.execute();
-    return !!result.affected;
+    return query.builder.execute();
   }
 
   async getMany(
