@@ -1,0 +1,18 @@
+import { BuilderOptionsDto } from '@/common/utils/builder';
+import { DeleteResult, UpdateResult } from 'typeorm';
+import { IScript, ScriptAggregate } from '@/models/script';
+
+export abstract class ScriptRepositoryDomain {
+  abstract create(project: IScript): Promise<ScriptAggregate>;
+  abstract update(id: number, data: Partial<IScript>): Promise<UpdateResult>;
+
+  abstract getOne(
+    options?: BuilderOptionsDto<IScript>,
+  ): Promise<ScriptAggregate | null>;
+
+  abstract getMany(
+    options?: BuilderOptionsDto<IScript>,
+  ): Promise<ScriptAggregate[]>;
+
+  abstract remove(id: number): Promise<DeleteResult>;
+}

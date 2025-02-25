@@ -67,3 +67,12 @@ export const PERMISSION_LIST: AccessController = {
   ],
   operator: 'or',
 };
+
+export const SCRIPT_CREATE: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SCRIPT,
+    PermissionType.WRITE_SCRIPT,
+  ],
+  operator: 'or',
+}
