@@ -4,13 +4,11 @@ import { UserRepository } from '@/repositories/user';
 import {
   CreateSubscriberDto,
   ExistSubscriberDto,
+  RemoveSubscriberDto,
+  UnsubscribeDto,
 } from '@/modules/subscriber/dto';
 import { CommonError, errors } from '@/common/error';
-import {
-  ISubscriber,
-  SubscriberAggregate,
-  SubscriberUser,
-} from '@/models/subscriber';
+import { SubscriberAggregate, SubscriberUser } from '@/models/subscriber';
 
 @Injectable()
 export class SubscriberService {
@@ -44,7 +42,7 @@ export class SubscriberService {
     const exist = await this._subscriberRepository.exist({
       filter: [
         { field: 'projectId', value: dto.projectId },
-        { field: 'userId', value: dto.userId },
+        { field: 'userId', value: dto.userId, operator: 'and' },
       ],
     });
 
@@ -52,5 +50,73 @@ export class SubscriberService {
       throw new CommonError({ messages: errors.subscriber.not_exist });
     }
     return exist;
+  }
+
+  // Удаление пользователя из подписчиков
+  public async remove(dto: RemoveSubscriberDto) {
+    const subscriber = await this._subscriberRepository.getOne({
+      filter: [
+        { field: 'projectId', value: dto.projectId },
+        { field: 'id', value: dto.subscriberId, operator: 'and' },
+      ],
+    });
+
+    if (!subscriber) {
+      throw new CommonError({ messages: errors.subscriber.not_exist });
+    }
+
+    const success = await this._subscriberRepository.remove({
+      filter: { field: 'id', value: dto.subscriberId },
+    });
+
+    if (!success) {
+      throw new CommonError({ messages: errors.subscriber.remove });
+    }
+
+    return subscriber;
+  }
+
+  // Подписчик сам отписывается от проекта
+  public async unsubscribe(dto: UnsubscribeDto) {
+    const subscriber = await this._subscriberRepository.getOne({
+      filter: [
+        { field: 'projectId', value: dto.projectId },
+        { field: 'userId', value: dto.userId, operator: 'and' },
+      ],
+    });
+
+    if (!subscriber) {
+      throw new CommonError({ messages: errors.subscriber.not_exist });
+    }
+
+    const success = await this._subscriberRepository.remove({
+      filter: { field: 'id', value: subscriber.id },
+    });
+
+    if (!success) {
+      throw new CommonError({ messages: errors.subscriber.remove });
+    }
+
+    return success;
+  }
+
+  public async projectSubscribers(projectId: number) {
+    const subscribers = await this._subscriberRepository.getMany({
+      filter: { field: 'projectId', value: projectId },
+    });
+
+    const mapSubscribers = subscribers.reduce((acc, user) => {
+      acc[user.userId] = user;
+      return acc;
+    }, {});
+
+    const userIds = subscribers.map((subscribe) => subscribe.userId);
+    const users = await this._userRepository.getMany({
+      filter: { field: 'id', value: userIds },
+    });
+
+    return users.map((user) =>
+      SubscriberUser.create(mapSubscribers[user.id], user),
+    );
   }
 }
