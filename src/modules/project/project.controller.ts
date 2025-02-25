@@ -70,6 +70,7 @@ export class ProjectController {
   @Delete(':projectId')
   @UseGuards(PermissionGuard)
   @Permission(PROJECT_REMOVE)
+  @UseInterceptors(TransactionInterceptor)
   public async remove(@Param('projectId') projectId) {
     const success = await this.projectService.remove(projectId, true);
     await this.permissionService.removeProjectPermissions(projectId);

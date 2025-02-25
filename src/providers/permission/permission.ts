@@ -1,11 +1,10 @@
 import {
   AccessController,
-  PermissionEnum,
   PermissionType,
 } from '@/providers/permission/permission.type';
 
 export const PROJECT_UPDATE: AccessController = {
-  permissions: [PermissionType.OWNER, PermissionEnum.WRITE_PROJECT],
+  permissions: [PermissionType.OWNER, PermissionType.WRITE_PROJECT],
   operator: 'or',
 };
 
@@ -25,7 +24,29 @@ export const PROJECT_REMOVE: AccessController = {
 };
 
 export const SUBSCRIBER_CREATE: AccessController = {
-  permissions: [PermissionType.OWNER],
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SUBSCRIBER,
+    PermissionType.CREATE_SUBSCRIBER,
+  ],
+  operator: 'or',
+};
+
+export const SUBSCRIBER_VIEW: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SUBSCRIBER,
+    PermissionType.READ_SUBSCRIBER,
+  ],
+  operator: 'or',
+};
+
+export const SUBSCRIBER_REMOVE: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SUBSCRIBER,
+    PermissionType.REMOVE_SUBSCRIBER,
+  ],
   operator: 'or',
 };
 
