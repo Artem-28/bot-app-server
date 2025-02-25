@@ -6,4 +6,8 @@ export abstract class UserRepositoryDomain {
   abstract getOne(
     options?: BuilderOptionsDto<IUser>,
   ): Promise<UserAggregate | null>;
+
+  abstract getMany(
+    options?: BuilderOptionsDto<IUser>,
+  ): Promise<UserAggregate[]>;
 }

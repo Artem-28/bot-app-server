@@ -4,7 +4,8 @@ import { UserRepository } from '@/repositories/user';
 import {
   CreateSubscriberDto,
   ExistSubscriberDto,
-  RemoveSubscriberDto, UnsubscribeDto,
+  RemoveSubscriberDto,
+  UnsubscribeDto,
 } from '@/modules/subscriber/dto';
 import { CommonError, errors } from '@/common/error';
 import { SubscriberAggregate, SubscriberUser } from '@/models/subscriber';
@@ -97,5 +98,25 @@ export class SubscriberService {
     }
 
     return success;
+  }
+
+  public async projectSubscribers(projectId: number) {
+    const subscribers = await this._subscriberRepository.getMany({
+      filter: { field: 'projectId', value: projectId },
+    });
+
+    const mapSubscribers = subscribers.reduce((acc, user) => {
+      acc[user.userId] = user;
+      return acc;
+    }, {});
+
+    const userIds = subscribers.map((subscribe) => subscribe.userId);
+    const users = await this._userRepository.getMany({
+      filter: { field: 'id', value: userIds },
+    });
+
+    return users.map((user) =>
+      SubscriberUser.create(mapSubscribers[user.id], user),
+    );
   }
 }

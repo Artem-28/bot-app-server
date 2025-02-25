@@ -57,6 +57,7 @@ export class SubscriberController {
   @Permission(SUBSCRIBER_VIEW)
   async subscribers(@Param('projectId') projectId) {
     projectId = Number(projectId);
+    return await this.subscriberService.projectSubscribers(projectId);
   }
 
   @Post('unsubscribe')

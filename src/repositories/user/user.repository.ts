@@ -30,4 +30,14 @@ export class UserRepository
     if (!result) return null;
     return UserAggregate.create(result);
   }
+
+  public async getMany(
+    options?: BuilderOptionsDto<IUser>,
+  ): Promise<UserAggregate[]> {
+    const repository = this.getRepository(UserEntity);
+    const query = HQueryBuilder.select(repository, options);
+
+    const result = await query.builder.getMany();
+    return result.map((data) => UserAggregate.create(data));
+  }
 }
