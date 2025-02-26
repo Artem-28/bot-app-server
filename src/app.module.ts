@@ -10,6 +10,7 @@ import { ProjectModule } from './modules/project/project.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { SubscriberModule } from './modules/subscriber/subscriber.module';
 import { ResourceModule } from './modules/resource/resource.module';
+import { ScriptModule } from './modules/script/script.module';
 
 // Configuration
 
@@ -30,6 +31,7 @@ import { ResourceModule } from './modules/resource/resource.module';
     PermissionModule,
     SubscriberModule,
     ResourceModule,
+    ScriptModule,
   ],
   providers: [],
 })

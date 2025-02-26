@@ -67,7 +67,7 @@ export class ConfirmCodeAggregate
   static create(data: Partial<IConfirmCode>) {
     const _confirmCode = new ConfirmCodeAggregate();
     Object.assign(_confirmCode, data);
-    _confirmCode.updatedAt = data?.id ? new Date() : _confirmCode.updatedAt;
+    _confirmCode.createdAt = data?.id ? _confirmCode.createdAt : new Date();
     const errors = validateSync(_confirmCode, { whitelist: true });
     if (!!errors.length) {
       throw new DomainError(errors);

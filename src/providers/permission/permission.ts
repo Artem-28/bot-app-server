@@ -67,3 +67,40 @@ export const PERMISSION_LIST: AccessController = {
   ],
   operator: 'or',
 };
+
+export const SCRIPT_CREATE: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SCRIPT,
+    PermissionType.WRITE_SCRIPT,
+  ],
+  operator: 'or',
+};
+
+export const SCRIPT_UPDATE: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SCRIPT,
+    PermissionType.WRITE_SCRIPT,
+  ],
+  operator: 'or',
+};
+
+export const SCRIPT_VIEW: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SCRIPT,
+    PermissionType.READ_SCRIPT,
+  ],
+  operator: 'or',
+};
+
+export const SCRIPT_REMOVE: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_SCRIPT,
+    PermissionType.REMOVE_SCRIPT,
+  ],
+  operator: 'or',
+};
+

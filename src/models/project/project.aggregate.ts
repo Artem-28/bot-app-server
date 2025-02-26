@@ -23,7 +23,7 @@ export class ProjectAggregate
   static create(data: Partial<IProject>) {
     const _project = new ProjectAggregate();
     Object.assign(_project, data);
-    _project.updatedAt = data?.id ? new Date() : _project.updatedAt;
+    _project.createdAt = data?.id ? _project.createdAt : new Date();
     const errors = validateSync(_project, { whitelist: true });
     if (!!errors.length) {
       throw new DomainError(errors);

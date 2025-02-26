@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/repositories/base.repository';
-import {DataSource, DeleteResult, UpdateResult} from 'typeorm';
+import { DataSource, DeleteResult, UpdateResult } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { ProjectRepositoryDomain } from '@/repositories/project/project-repository.domain';
 import { IProject, ProjectAggregate, ProjectEntity } from '@/models/project';

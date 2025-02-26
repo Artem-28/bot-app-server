@@ -32,7 +32,7 @@ export class AuthDataAggregate
   static create(data: Partial<IAuthData>) {
     const _entity = new AuthDataAggregate();
     Object.assign(_entity, data);
-    _entity.updatedAt = data?.id ? new Date() : _entity.updatedAt;
+    _entity.createdAt = data?.id ? _entity.createdAt : new Date();
     const errors = validateSync(_entity, { whitelist: true });
     if (!!errors.length) {
       throw new DomainError(errors);

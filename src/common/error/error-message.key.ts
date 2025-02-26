@@ -33,6 +33,11 @@ export const errors = {
     update: 'errors.project.update', // Ошибка при обновлении проекта
     remove: 'errors.project.remove', // Ошибка при удалении проекта
   },
+  script: {
+    not_found: 'errors.script.not_found',
+    update: 'errors.script.update', // Ошибка при обновлении скрипта
+    remove: 'errors.script.remove', // Ошибка при удалении скрипта
+  },
   subscriber: {
     owner_project: 'errors.subscriber.owner_project', // Невозможно добавить подписчика, так как он является владельцеп проекта
     not_exist: 'errors.subscriber.not_exist',
