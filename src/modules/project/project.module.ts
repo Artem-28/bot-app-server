@@ -7,6 +7,7 @@ import { UserRepository } from '@/repositories/user';
 import { UserService } from '@/modules/user/user.service';
 import { PermissionService } from '@/modules/permission/permission.service';
 import { UserPermissionRepository } from '@/repositories/user-permission';
+import { ScriptRepository } from '@/repositories/script';
 
 @Module({
   providers: [
@@ -17,6 +18,7 @@ import { UserPermissionRepository } from '@/repositories/user-permission';
     SubscriberRepository,
     PermissionService,
     UserPermissionRepository,
+    ScriptRepository,
   ],
   controllers: [ProjectController],
 })

@@ -2,9 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BaseRepository } from '@/repositories/base.repository';
 import { DataSource, DeleteResult, UpdateResult } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
-import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
+import {
+  BuilderOptionsDto,
+  DeleteBuilderOptions,
+  HQueryBuilder,
+} from '@/common/utils/builder';
 import { ScriptRepositoryDomain } from '@/repositories/script/script-repository.domain';
-import {IScript, ScriptAggregate, ScriptEntity} from '@/models/script';
+import { IScript, ScriptAggregate, ScriptEntity } from '@/models/script';
 
 @Injectable()
 export class ScriptRepository
@@ -40,12 +44,9 @@ export class ScriptRepository
       .execute();
   }
 
-  remove(id: number): Promise<DeleteResult> {
+  remove(options: DeleteBuilderOptions<IScript>): Promise<DeleteResult> {
     const repository = this.getRepository(ScriptEntity);
-    const query = HQueryBuilder.delete(repository, {
-      filter: { field: 'id', value: id },
-    });
-
+    const query = HQueryBuilder.delete(repository, options);
     return query.builder.execute();
   }
 

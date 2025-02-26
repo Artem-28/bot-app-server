@@ -43,7 +43,7 @@ export class UserAggregate extends BaseAggregate<IUser> implements IUser {
   static create(data: Partial<IUser>) {
     const _user = new UserAggregate();
     Object.assign(_user, data);
-    _user.updatedAt = data?.id ? new Date() : _user.updatedAt;
+    _user.createdAt = data?.id ? _user.createdAt : new Date();
     const errors = validateSync(_user, { whitelist: true });
     if (!!errors.length) {
       throw new DomainError(errors);

@@ -1,13 +1,8 @@
-import { IsDefined, IsNumber, IsString } from 'class-validator';
+import { IsDefined, IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateScriptBodyDto {
+export class CreateScriptDto {
   @IsDefined()
   @IsString()
+  @IsNotEmpty()
   title: string;
-}
-
-export class CreateScriptDto extends CreateScriptBodyDto {
-  @IsDefined()
-  @IsNumber()
-  projectId: number;
 }

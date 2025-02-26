@@ -14,7 +14,10 @@ export class BaseAggregate<T> implements IBase {
   updatedAt = new Date();
 
   public update(data: Partial<T>) {
-    Object.entries(data).forEach(([key, value]) => {
+    const entries = Object.entries(data);
+    if (entries.length === 0) return;
+
+    entries.forEach(([key, value]) => {
       this[key] = value;
     });
     this.updatedAt = new Date();

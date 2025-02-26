@@ -1,4 +1,7 @@
-import { BuilderOptionsDto } from '@/common/utils/builder';
+import {
+  BuilderOptionsDto,
+  DeleteBuilderOptions,
+} from '@/common/utils/builder';
 import { DeleteResult, UpdateResult } from 'typeorm';
 import { IScript, ScriptAggregate } from '@/models/script';
 
@@ -14,5 +17,7 @@ export abstract class ScriptRepositoryDomain {
     options?: BuilderOptionsDto<IScript>,
   ): Promise<ScriptAggregate[]>;
 
-  abstract remove(id: number): Promise<DeleteResult>;
+  abstract remove(
+    options: DeleteBuilderOptions<IScript>,
+  ): Promise<DeleteResult>;
 }

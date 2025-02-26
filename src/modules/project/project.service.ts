@@ -9,6 +9,7 @@ import { ProjectAggregate } from '@/models/project';
 import { CommonError, errors } from '@/common/error';
 import { SubscriberRepository } from '@/repositories/subscriber';
 import { UserRepository } from '@/repositories/user';
+import { ScriptRepository } from '@/repositories/script';
 
 @Injectable()
 export class ProjectService {
@@ -16,6 +17,7 @@ export class ProjectService {
     private readonly _projectRepository: ProjectRepository,
     private readonly _subscriberRepository: SubscriberRepository,
     private readonly _userRepository: UserRepository,
+    private readonly _scriptRepository: ScriptRepository,
   ) {}
 
   public async create(dto: CreateProjectDto) {
@@ -34,10 +36,7 @@ export class ProjectService {
     });
 
     if (!project) {
-      throw new CommonError({
-        target: 'app',
-        messages: errors.project.not_found,
-      });
+      throw new CommonError({ messages: errors.project.not_found });
     }
 
     project.update(payload);
@@ -149,6 +148,11 @@ export class ProjectService {
     if (success) {
       // Удаляем всех подписчиков на этом проекте
       await this._subscriberRepository.remove({
+        filter: { field: 'projectId', value: projectId },
+      });
+
+      // Удаляем все скрипты из проекта
+      await this._scriptRepository.remove({
         filter: { field: 'projectId', value: projectId },
       });
     }
