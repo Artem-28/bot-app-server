@@ -15,6 +15,10 @@ export enum PermissionEnum {
   CREATE_SUBSCRIBER = 'create_subscriber',
   REMOVE_SUBSCRIBER = 'remove_subscriber',
   READ_SUBSCRIBER = 'read_subscriber',
+  ACCESS_RESPONDENT = 'access_respondent',
+  READ_RESPONDENT = 'read_respondent',
+  WRITE_RESPONDENT = 'write_respondent',
+  REMOVE_RESPONDENT = 'remove_respondent',
 }
 
 export const PermissionType = Object.assign(

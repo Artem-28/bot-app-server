@@ -19,8 +19,8 @@ export class ScriptRepository
     super(dataSource, request);
   }
 
-  async create(script: IScript): Promise<ScriptAggregate> {
-    const result = await this.getRepository(ScriptEntity).save(script);
+  async create(data: IScript): Promise<ScriptAggregate> {
+    const result = await this.getRepository(ScriptEntity).save(data);
     return ScriptAggregate.create(result);
   }
 

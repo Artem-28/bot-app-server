@@ -104,3 +104,20 @@ export const SCRIPT_REMOVE: AccessController = {
   operator: 'or',
 };
 
+export const RESPONDENT_CREATE: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_RESPONDENT,
+    PermissionType.WRITE_RESPONDENT,
+  ],
+  operator: 'or',
+};
+
+export const RESPONDENT_VIEW: AccessController = {
+  permissions: [
+    PermissionType.OWNER,
+    PermissionType.ACCESS_RESPONDENT,
+    PermissionType.READ_RESPONDENT,
+  ],
+  operator: 'or',
+};

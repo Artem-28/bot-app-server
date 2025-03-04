@@ -22,6 +22,10 @@ export interface IProjectParam {
   projectId: string;
 }
 
-export interface IScriptParam extends IProjectParam{
+export interface IScriptParam extends IProjectParam {
   scriptId: string;
+}
+
+export interface IRespondentParam extends IProjectParam {
+  respondentId: string;
 }
