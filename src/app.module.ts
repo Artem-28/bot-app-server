@@ -11,6 +11,7 @@ import { PermissionModule } from './modules/permission/permission.module';
 import { SubscriberModule } from './modules/subscriber/subscriber.module';
 import { ResourceModule } from './modules/resource/resource.module';
 import { ScriptModule } from './modules/script/script.module';
+import { RespondentModule } from './modules/respondent/respondent.module';
 
 // Configuration
 
@@ -32,6 +33,7 @@ import { ScriptModule } from './modules/script/script.module';
     SubscriberModule,
     ResourceModule,
     ScriptModule,
+    RespondentModule,
   ],
   providers: [],
 })

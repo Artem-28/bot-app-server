@@ -6,7 +6,7 @@ import { DeleteResult, UpdateResult } from 'typeorm';
 import { IScript, ScriptAggregate } from '@/models/script';
 
 export abstract class ScriptRepositoryDomain {
-  abstract create(project: IScript): Promise<ScriptAggregate>;
+  abstract create(data: IScript): Promise<ScriptAggregate>;
   abstract update(id: number, data: Partial<IScript>): Promise<UpdateResult>;
 
   abstract getOne(
