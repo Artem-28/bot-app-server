@@ -12,6 +12,7 @@ import { SubscriberModule } from './modules/subscriber/subscriber.module';
 import { ResourceModule } from './modules/resource/resource.module';
 import { ScriptModule } from './modules/script/script.module';
 import { RespondentModule } from './modules/respondent/respondent.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 // Configuration
 
@@ -34,6 +35,7 @@ import { RespondentModule } from './modules/respondent/respondent.module';
     ResourceModule,
     ScriptModule,
     RespondentModule,
+    ChatModule,
   ],
   providers: [],
 })

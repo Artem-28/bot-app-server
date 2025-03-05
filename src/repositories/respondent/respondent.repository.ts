@@ -19,7 +19,7 @@ export class RespondentRepository
   extends BaseRepository
   implements RespondentRepositoryDomain
 {
-  constructor(dataSource: DataSource, @Inject(REQUEST) request: Request) {
+  constructor(dataSource: DataSource, @Inject(REQUEST) request?: Request) {
     super(dataSource, request);
   }
 

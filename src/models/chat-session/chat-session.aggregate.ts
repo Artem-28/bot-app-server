@@ -4,12 +4,12 @@ import {
   IsDate,
   IsDefined,
   IsNotEmpty,
-  IsNumber,
+  IsNumber, IsOptional,
   IsString,
   validateSync,
 } from 'class-validator';
-import { IConfirmCode } from '@/models/confirm-code';
 import { DomainError } from '@/common/error';
+import {Exclude} from "class-transformer";
 
 export class ChatSessionAggregate
   extends BaseAggregate<IChatSession>
@@ -36,14 +36,28 @@ export class ChatSessionAggregate
   @IsDefined()
   title: string;
 
+  /** Ключ сессии */
+  @IsString()
+  @IsNotEmpty()
+  @IsDefined()
+  @Exclude()
+  key: string;
+
+  /** Дата последней активности */
+  @IsDate()
+  @IsDefined()
+  lastActiveAt: Date;
+
   /** Время окончания сессии */
   @IsDate()
+  @IsOptional()
   overAt: Date | null = null;
 
-  static create(data: Partial<IConfirmCode>) {
+  static create(data: Partial<IChatSession>) {
     const _entity = new ChatSessionAggregate();
     Object.assign(_entity, data);
     _entity.createdAt = data?.id ? _entity.createdAt : new Date();
+    _entity.lastActiveAt = data?.id ? _entity.lastActiveAt : new Date();
     const errors = validateSync(_entity, { whitelist: true });
     if (!!errors.length) {
       throw new DomainError(errors);
@@ -57,8 +71,10 @@ export class ChatSessionAggregate
       projectId: this.projectId,
       scriptId: this.scriptId,
       respondentId: this.respondentId,
+      key: this.key,
       title: this.title,
       overAt: this.overAt,
+      lastActiveAt: this.lastActiveAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

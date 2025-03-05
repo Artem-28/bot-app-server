@@ -55,4 +55,8 @@ export const errors = {
   validators: {
     is_defined: 'errors.validators.is_defined', // Поле обязательно
   },
+  chat: {
+    session_create: 'errors.chat.session_create', // Ошибка при создании сессии
+    connect: 'errors.chat.connect', // Ошибка при подключении
+  },
 };

@@ -16,12 +16,21 @@ const table = hCreateTable(CHAT_SESSION_TABLE, [
     type: 'int',
   },
   {
+    name: 'key',
+    type: 'varchar',
+  },
+  {
     name: 'title',
     type: 'varchar',
   },
   {
+    name: 'last_active_at',
+    type: 'timestamp',
+  },
+  {
     name: 'over_at',
     type: 'timestamp',
+    isNullable: true,
   },
 ]);
 
