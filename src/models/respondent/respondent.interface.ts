@@ -4,6 +4,8 @@ export interface IRespondent extends IBase {
   /** Проект к которому привязан респондента */
   projectId: number;
 
+  fingerprintKey: string | null;
+
   /** Имя респондента */
   name: string | null;
 

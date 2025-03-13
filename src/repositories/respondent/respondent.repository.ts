@@ -24,8 +24,8 @@ export class RespondentRepository
   }
 
   async create(data: IRespondent): Promise<RespondentAggregate> {
-    const result = await this.getRepository(RespondentEntity).save(data);
-    return RespondentAggregate.create(result);
+    const respondent = await this.getRepository(RespondentEntity).save(data);
+    return RespondentAggregate.create(respondent);
   }
 
   async getOne(
@@ -40,6 +40,7 @@ export class RespondentRepository
   }
 
   update(id: number, data: Partial<IRespondent>): Promise<UpdateResult> {
+    console.log('DATA', data);
     return this.getRepository(RespondentEntity)
       .createQueryBuilder()
       .update()

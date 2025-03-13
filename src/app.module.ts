@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProviderModule } from '@/providers/provider.module';
 import { CommonModule } from '@/common/common.module';
@@ -13,6 +13,8 @@ import { ResourceModule } from './modules/resource/resource.module';
 import { ScriptModule } from './modules/script/script.module';
 import { RespondentModule } from './modules/respondent/respondent.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { FingerprintMiddleware } from '@/common/middleware';
+import { FingerprintModule } from './modules/fingerprint/fingerprint.module';
 
 // Configuration
 
@@ -36,7 +38,13 @@ import { ChatModule } from './modules/chat/chat.module';
     ScriptModule,
     RespondentModule,
     ChatModule,
+    FingerprintModule,
+    // ChatModule,
   ],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(FingerprintMiddleware).forRoutes('api/v1/projects/:projectId/chats/respondent-connection'); // Применяем middleware только к маршруту /protected
+  }
+}

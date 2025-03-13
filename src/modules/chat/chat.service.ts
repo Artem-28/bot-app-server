@@ -1,27 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { ChatSessionRepository } from '@/repositories/chat-session';
-import { CreateChatSessionDto } from '@/modules/chat/dto';
+import { ChatConnectionRepository } from '@/repositories/chat-connection';
+import {
+  OperatorConnectionDto,
+  RespondentConnectionDto,
+} from '@/modules/chat/dto';
+import { JwtService } from '@nestjs/jwt';
+import { hGenerateCode } from '@/common/utils/generator';
+import * as bcrypt from 'bcrypt';
+import { ChatConnectionAggregate } from '@/models/chat-connections';
 import { ScriptRepository } from '@/repositories/script';
 import { RespondentRepository } from '@/repositories/respondent';
 import { CommonError, errors } from '@/common/error';
 import { RespondentAggregate } from '@/models/respondent';
-import { hGenerateCode } from '@/common/utils/generator';
-import * as bcrypt from 'bcrypt';
-import { ChatSessionAggregate } from '@/models/chat-session';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class ChatService {
   constructor(
     private readonly _jwtService: JwtService,
-    private readonly _chatSessionRepository: ChatSessionRepository,
+    private readonly _chatConnectionRepository: ChatConnectionRepository,
     private readonly _scriptRepository: ScriptRepository,
     private readonly _respondentRepository: RespondentRepository,
   ) {}
 
-  public async getStartData() {}
+  private async generateConnectionKey() {
+    const key = hGenerateCode('****-****-****-****');
+    const hashKey = await bcrypt.hash(key, 10);
+    return { key, hashKey };
+  }
 
-  public async createSession(dto: CreateChatSessionDto) {
+  public async operatorConnectionData(dto: OperatorConnectionDto) {
+    const { key, hashKey } = await this.generateConnectionKey();
+
+    const connection = await this._chatConnectionRepository.create(
+      ChatConnectionAggregate.create({
+        projectId: dto.projectId,
+        userId: dto.userId,
+        key: hashKey,
+      }),
+    );
+
+    return this._jwtService.sign({
+      connectionKey: key,
+      connectionId: connection.id,
+    });
+  }
+
+  public async respondentConnectionData(dto: RespondentConnectionDto) {
+    const { projectId, scriptId, fingerprint } = dto;
+    const respondentInstance = RespondentAggregate.create({
+      projectId,
+      name: 'respondent.new',
+    }).instance;
+    console.log('RESPONDENT', respondentInstance);
+  }
+
+  /*public async respondentConnectionData(dto: RespondentConnectionDto) {
     const { projectId, scriptId, respondentId } = dto;
     const script = await this._scriptRepository.getOne({
       filter: [
@@ -48,27 +81,24 @@ export class ChatService {
         name: 'respondent.new',
       });
       respondent = await this._respondentRepository.create(respondent.instance);
+
+      const { key, hashKey } = await this.generateConnectionKey();
+
+      const connection = await this._chatConnectionRepository.create(
+        ChatConnectionAggregate.create({
+          projectId: dto.projectId,
+          scriptId: dto.scriptId,
+          respondentId: respondent.id,
+          key: hashKey,
+        }),
+      );
+
+      const token = this._jwtService.sign({
+        connectionKey: key,
+        connectionId: connection.id,
+      });
+
+      return { token, respondent };
     }
-
-    const key = hGenerateCode('****-****-****-****');
-    const hashKey = await bcrypt.hash(key, 10);
-    const sessionInstance = ChatSessionAggregate.create({
-      projectId,
-      scriptId,
-      respondentId: respondent.id,
-      key: hashKey,
-      title: script.title,
-    }).instance;
-    const session = await this._chatSessionRepository.create(sessionInstance);
-
-    const chatToken = this._jwtService.sign({
-      sessionKey: key,
-      sessionId: session.id,
-    });
-
-    return {
-      chatToken,
-      respondent,
-    };
-  }
+  }*/
 }

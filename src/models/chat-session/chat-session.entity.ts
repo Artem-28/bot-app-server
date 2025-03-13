@@ -15,14 +15,5 @@ export class ChatSessionEntity extends BaseEntity {
   public respondentId: number;
 
   @Column()
-  public key: string;
-
-  @Column()
   public title: string;
-
-  @Column({ name: 'last_active_at' })
-  lastActiveAt: Date;
-
-  @Column({ name: 'over_at', nullable: true })
-  public overAt: Date | null;
 }

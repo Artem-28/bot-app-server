@@ -1,8 +1,12 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { hCreateTable } from '@/common/utils/database';
-import { CHAT_SESSION_TABLE } from '@/models/chat-session';
+import { CHAT_CONNECTION_TABLE } from '@/models/chat-connections';
 
-const table = hCreateTable(CHAT_SESSION_TABLE, [
+const table = hCreateTable(CHAT_CONNECTION_TABLE, [
+  {
+    name: 'key',
+    type: 'varchar',
+  },
   {
     name: 'project_id',
     type: 'int',
@@ -10,18 +14,34 @@ const table = hCreateTable(CHAT_SESSION_TABLE, [
   {
     name: 'script_id',
     type: 'int',
+    isNullable: true,
+    default: null,
   },
   {
     name: 'respondent_id',
     type: 'int',
+    isNullable: true,
+    default: null,
   },
   {
-    name: 'title',
+    name: 'user_id',
+    type: 'int',
+    isNullable: true,
+    default: null,
+  },
+  {
+    name: 'socket_id',
     type: 'varchar',
+    isNullable: true,
+    default: null,
+  },
+  {
+    name: 'connected',
+    type: 'boolean',
+    default: false,
   },
 ]);
-
-export class CreateChatSessionsTable1741109934443
+export class CreateChatConnectionsTable1741270518745
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {

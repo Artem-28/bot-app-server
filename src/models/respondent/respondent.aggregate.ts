@@ -1,13 +1,10 @@
 import {
   IsDefined,
   IsEmail,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  validateSync,
 } from 'class-validator';
-import { DomainError } from '@/common/error';
 import { BaseAggregate } from '@/models/base';
 import { IRespondent } from '@/models/respondent/respondent.interface';
 
@@ -39,20 +36,20 @@ export class RespondentAggregate
   @IsOptional()
   phone = null;
 
+  @IsOptional()
+  @IsString()
+  fingerprintKey: string | null;
+
   static create(data: Partial<IRespondent>) {
     const _entity = new RespondentAggregate();
-    Object.assign(_entity, data);
-    _entity.createdAt = data?.id ? _entity.createdAt : new Date();
-    const errors = validateSync(_entity, { whitelist: true });
-    if (!!errors.length) {
-      throw new DomainError(errors);
-    }
+    _entity.update(data);
     return _entity;
   }
 
   get instance(): IRespondent {
     return {
       projectId: this.projectId,
+      fingerprintKey: this.fingerprintKey,
       name: this.name,
       surname: this.surname,
       patronymic: this.patronymic,

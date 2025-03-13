@@ -1,0 +1,1 @@
+export * from './fingerprint.middleware';
