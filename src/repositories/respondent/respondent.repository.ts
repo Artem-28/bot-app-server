@@ -19,13 +19,13 @@ export class RespondentRepository
   extends BaseRepository
   implements RespondentRepositoryDomain
 {
-  constructor(dataSource: DataSource, @Inject(REQUEST) request: Request) {
+  constructor(dataSource: DataSource, @Inject(REQUEST) request?: Request) {
     super(dataSource, request);
   }
 
   async create(data: IRespondent): Promise<RespondentAggregate> {
-    const result = await this.getRepository(RespondentEntity).save(data);
-    return RespondentAggregate.create(result);
+    const respondent = await this.getRepository(RespondentEntity).save(data);
+    return RespondentAggregate.create(respondent);
   }
 
   async getOne(
@@ -40,6 +40,7 @@ export class RespondentRepository
   }
 
   update(id: number, data: Partial<IRespondent>): Promise<UpdateResult> {
+    console.log('DATA', data);
     return this.getRepository(RespondentEntity)
       .createQueryBuilder()
       .update()

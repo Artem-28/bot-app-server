@@ -8,6 +8,9 @@ export class RespondentEntity extends BaseEntity {
   @Column({ name: 'project_id' })
   public projectId: number;
 
+  @Column({ name: 'fingerprint_key', nullable: true })
+  public fingerprintKey: string | null;
+
   @Column({ nullable: true })
   public name: string | null;
 

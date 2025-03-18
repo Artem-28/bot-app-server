@@ -21,6 +21,7 @@ export class BaseAggregate<T> implements IBase {
       this[key] = value;
     });
     this.updatedAt = new Date();
+
     const errors = validateSync(this, { whitelist: true });
     if (!!errors.length) {
       throw new DomainError(errors);

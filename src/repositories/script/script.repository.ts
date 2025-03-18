@@ -15,7 +15,7 @@ export class ScriptRepository
   extends BaseRepository
   implements ScriptRepositoryDomain
 {
-  constructor(dataSource: DataSource, @Inject(REQUEST) request: Request) {
+  constructor(dataSource: DataSource, @Inject(REQUEST) request?: Request) {
     super(dataSource, request);
   }
 
