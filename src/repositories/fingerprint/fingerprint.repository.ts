@@ -1,7 +1,7 @@
 import { BaseRepository } from '@/repositories/base.repository';
 import { FingerprintRepositoryDomain } from '@/repositories/fingerprint/fingerprint-repository.domain';
 import { Inject, Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, UpdateResult } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import {
   FingerprintGroupEntity,
@@ -24,16 +24,11 @@ export class FingerprintRepository
     super(dataSource, request);
   }
 
-  async createOrUpdateFingerprint(
+  async createFingerprintGroup(
     data: IFingerprintGroup,
   ): Promise<FingerprintGroupAggregate> {
-    const group = await this.getRepository(FingerprintGroupEntity).save({
-      key: data.key,
-    });
-    const fingerprints = await this.getRepository(FingerprintEntity).save(
-      data.fingerprints,
-    );
-    return FingerprintGroupAggregate.create({ ...group, fingerprints });
+    const group = await this.getRepository(FingerprintGroupEntity).save(data);
+    return FingerprintGroupAggregate.create(group);
   }
 
   async getFingerprint(options?: BuilderOptionsDto<IFingerprint>) {
@@ -41,9 +36,7 @@ export class FingerprintRepository
     const query = HQueryBuilder.select(repository, options);
 
     const result = await query.builder.getOne();
-    console.log(result);
     if (!result) return null;
-
     return FingerprintAggregate.create(result);
   }
 
@@ -61,5 +54,17 @@ export class FingerprintRepository
       filter: { field: 'key', value: key },
     });
     return query.builder.getExists();
+  }
+
+  updateFingerprint(
+    fingerprint: string,
+    data: Partial<IFingerprint>,
+  ): Promise<UpdateResult> {
+    return this.getRepository(FingerprintEntity)
+      .createQueryBuilder()
+      .update()
+      .set(data)
+      .where({ fingerprint })
+      .execute();
   }
 }

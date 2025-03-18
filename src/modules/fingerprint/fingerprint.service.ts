@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FingerprintRepository } from '@/repositories/fingerprint/fingerprint.repository';
 import { hGenerateCode } from '@/common/utils/generator';
 import { FingerprintGroupAggregate } from '@/models/fingerprint-group/fingerprint-group.aggregate';
-import { validate } from 'class-validator';
+import { hToArray } from '@/common/utils/formatter';
 
 @Injectable()
 export class FingerprintService {
@@ -20,21 +20,31 @@ export class FingerprintService {
     return key;
   }
 
+  public async createFingerprintGroup(print: string[] | string) {
+    const fingerprints = hToArray(print).map((item) => ({ fingerprint: item }));
+    const key = await this._generateGroupKey();
+    const instance = FingerprintGroupAggregate.create({
+      key,
+      fingerprints,
+    });
+    return this._fingerprintRepository.createFingerprintGroup(instance);
+  }
+
   public async createOrUpdateFingerprint(print: string) {
     const fingerprint = await this._fingerprintRepository.getFingerprint({
       filter: { field: 'fingerprint', value: print },
-      relation: [{ name: 'fingerprintGroup', method: 'leftJoinAndSelect' }],
     });
-    console.log('FINGERPRINT', fingerprint);
-    // const groupKey = await this._generateGroupKey();
-    // const groupInstance = FingerprintGroupAggregate.create({
-    //   key: groupKey,
-    //   fingerprints: [{ fingerprint: print }],
-    // }).instance;
-    // const fingerprintGroup =
-    //   await this._fingerprintRepository.createOrUpdateFingerprint(
-    //     groupInstance,
-    //   );
-    // console.log('GROUP_KEY', fingerprintGroup);
+
+    if (!fingerprint) {
+      const group = await this.createFingerprintGroup(print);
+      return group.fingerprints[0];
+    }
+
+    fingerprint.activity();
+    await this._fingerprintRepository.updateFingerprint(
+      print,
+      fingerprint.instance,
+    );
+    return fingerprint;
   }
 }

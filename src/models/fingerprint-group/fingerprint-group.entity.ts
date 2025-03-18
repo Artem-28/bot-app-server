@@ -8,7 +8,11 @@ export class FingerprintGroupEntity {
   @PrimaryColumn({ unique: true })
   public key: string;
 
-  @OneToMany(() => FingerprintEntity, (fingerprint) => fingerprint.fingerprintGroup)
+  @OneToMany(
+    () => FingerprintEntity,
+    (fingerprint) => fingerprint.fingerprintGroup,
+    { cascade: true },
+  )
   @JoinColumn({ name: 'key', referencedColumnName: 'group_key' })
   fingerprints: FingerprintEntity[];
 }

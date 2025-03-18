@@ -38,7 +38,9 @@ export class ChatController {
     @Param() param: IProjectParam,
     @Body() body: RespondentConnectionBodyDto,
   ) {
-    await this.fingerprintService.createOrUpdateFingerprint(req.fingerprint);
+    return await this.fingerprintService.createOrUpdateFingerprint(
+      req.fingerprint,
+    );
     // const projectId = Number(param.projectId);
     // return this.chatService.respondentConnectionData({
     //   fingerprint: req.fingerprint,

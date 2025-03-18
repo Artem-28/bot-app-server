@@ -53,4 +53,8 @@ export class FingerprintAggregate implements IFingerprint {
       createdAt: this.createdAt,
     };
   }
+
+  activity() {
+    this.lastActiveAt = new Date();
+  }
 }
