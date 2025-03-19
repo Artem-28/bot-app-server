@@ -10,7 +10,6 @@ import * as bcrypt from 'bcrypt';
 import { ChatConnectionAggregate } from '@/models/chat-connections';
 import { ScriptRepository } from '@/repositories/script';
 import { RespondentRepository } from '@/repositories/respondent';
-import { CommonError, errors } from '@/common/error';
 import { RespondentAggregate } from '@/models/respondent';
 
 @Injectable()

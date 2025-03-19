@@ -40,14 +40,6 @@ export class FingerprintRepository
     return FingerprintAggregate.create(result);
   }
 
-  async getGroupFingerprint(print: string): Promise<FingerprintGroupAggregate> {
-    const fingerprint = await this.getFingerprint({
-      filter: { field: 'fingerprint', value: print },
-    });
-    console.log(fingerprint);
-    return Promise.resolve(undefined);
-  }
-
   existKey(key: string): Promise<boolean> {
     const repository = this.getRepository(FingerprintGroupEntity);
     const query = HQueryBuilder.select(repository, {
@@ -66,5 +58,16 @@ export class FingerprintRepository
       .set(data)
       .where({ fingerprint })
       .execute();
+  }
+
+  async getFingerprintGroup(key: string): Promise<FingerprintGroupAggregate> {
+    const repository = this.getRepository(FingerprintGroupEntity);
+    const query = HQueryBuilder.select(repository, {
+      filter: { field: 'key', value: key },
+      relation: { name: 'fingerprints', method: 'leftJoinAndSelect' },
+    });
+    const result = await query.builder.getOne();
+    if (!result) return null;
+    return FingerprintGroupAggregate.create(result);
   }
 }

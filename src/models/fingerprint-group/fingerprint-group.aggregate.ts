@@ -8,7 +8,6 @@ import {
   validateSync,
 } from 'class-validator';
 import { DomainError } from '@/common/error';
-import { IRespondent } from '@/models/respondent';
 
 export class FingerprintGroupAggregate implements IFingerprintGroup {
   @IsString()

@@ -1,5 +1,6 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from '@/models/base';
+import { RespondentFingerprintEntity } from '@/models/respondent-fingerprint';
 
 export const RESPONDENT_TABLE = 'respondents';
 
@@ -7,9 +8,6 @@ export const RESPONDENT_TABLE = 'respondents';
 export class RespondentEntity extends BaseEntity {
   @Column({ name: 'project_id' })
   public projectId: number;
-
-  @Column({ name: 'fingerprint_key', nullable: true })
-  public fingerprintKey: string | null;
 
   @Column({ nullable: true })
   public name: string | null;
@@ -25,4 +23,12 @@ export class RespondentEntity extends BaseEntity {
 
   @Column({ nullable: true, unique: true })
   public phone: string | null;
+
+  @OneToMany(
+    () => RespondentFingerprintEntity,
+    (fingerprint) => fingerprint.respondent,
+    { cascade: true },
+  )
+  @JoinColumn({ name: 'id', referencedColumnName: 'respondent_id' })
+  fingerprints: RespondentFingerprintEntity[];
 }

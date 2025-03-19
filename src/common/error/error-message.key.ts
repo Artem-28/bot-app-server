@@ -59,4 +59,7 @@ export const errors = {
     session_create: 'errors.chat.session_create', // Ошибка при создании сессии
     connect: 'errors.chat.connect', // Ошибка при подключении
   },
+  messenger: {
+    connect: 'errors.messengers.connect',
+  },
 };

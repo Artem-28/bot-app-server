@@ -31,7 +31,11 @@ export class RespondentController {
     @Param() param: IProjectParam,
     @Body() body: UpdateRespondentDto,
   ) {
-    return await this.respondentService.create(param, body);
+    const projectId = Number(param.projectId);
+    return await this.respondentService.create({
+      projectId,
+      ...body,
+    });
   }
 
   @Get()
