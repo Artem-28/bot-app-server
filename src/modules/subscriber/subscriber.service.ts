@@ -104,6 +104,7 @@ export class SubscriberService {
     const subscribers = await this._subscriberRepository.getMany({
       filter: { field: 'projectId', value: projectId },
     });
+    if (!subscribers.length) return [];
 
     const mapSubscribers = subscribers.reduce((acc, user) => {
       acc[user.userId] = user;
