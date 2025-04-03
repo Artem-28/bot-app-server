@@ -29,7 +29,9 @@ export class AuthDataService {
   }
 
   public async signIn(dto: SignInDto, throwException = false) {
-    const authData = await this._authDataRepository.getOne(dto.email);
+    const authData = await this._authDataRepository.getOne({
+      filter: { field: 'login', value: dto.email },
+    });
     if (!authData && throwException) {
       throw new CommonError({
         messages: errors.sign_in.data_invalid,
@@ -40,6 +42,7 @@ export class AuthDataService {
     const passwordMatch = await bcrypt.compare(dto.password, authData.password);
 
     if (!passwordMatch && throwException) {
+      console.log('PASSWORD');
       throw new CommonError({ messages: errors.sign_in.data_invalid });
     }
     if (!passwordMatch) return null;
@@ -58,7 +61,9 @@ export class AuthDataService {
   }
 
   public async updatePassword(dto: UpdatePasswordDto, throwException = false) {
-    const authData = await this._authDataRepository.getOne(dto.login);
+    const authData = await this._authDataRepository.getOne({
+      filter: { field: 'login', value: dto.login },
+    });
     if (!authData && throwException) {
       throw new CommonError({ messages: errors.user.not_exist });
     }

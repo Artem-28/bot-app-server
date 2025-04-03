@@ -7,7 +7,11 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { IMessageSession } from '@/models/message-session/message-session.interface';
+import {
+  IMessageSession,
+  IMessageSessionInstance,
+} from '@/models/message-session/message-session.interface';
+import { RespondentAggregate } from '@/models/respondent';
 
 export class MessageSessionAggregate
   extends BaseAggregate<IMessageSession>
@@ -16,17 +20,17 @@ export class MessageSessionAggregate
   /** Индификатор проекта */
   @IsNumber()
   @IsDefined()
-  projectId: number;
+  project_id: number;
 
   /** Индификатор скрипта */
   @IsNumber()
   @IsDefined()
-  scriptId: number;
+  script_id: number;
 
   /** Индификатор респондента */
   @IsNumber()
   @IsDefined()
-  respondentId: number;
+  respondent_id: number;
 
   /** Название сессии */
   @IsString()
@@ -36,7 +40,10 @@ export class MessageSessionAggregate
 
   @IsDate()
   @IsOptional()
-  endAt: Date | null = null;
+  end_at: Date | null = null;
+
+  @IsOptional()
+  respondent: RespondentAggregate | null = null;
 
   static create(data: Partial<IMessageSession>) {
     const _entity = new MessageSessionAggregate();
@@ -44,14 +51,23 @@ export class MessageSessionAggregate
     return _entity;
   }
 
-  get instance(): IMessageSession {
+  update(data: Partial<IMessageSession>) {
+    const { respondent, ...params } = data;
+    if (respondent) {
+      this.respondent_id = respondent.id;
+      this.respondent = RespondentAggregate.create(respondent);
+    }
+    super.update(params);
+  }
+
+  get instance(): IMessageSessionInstance {
     return {
       id: this.id,
-      projectId: this.projectId,
-      scriptId: this.scriptId,
-      respondentId: this.respondentId,
+      project_id: this.project_id,
+      script_id: this.script_id,
+      respondent_id: this.respondent_id,
       title: this.title,
-      endAt: this.endAt,
+      end_at: this.end_at,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

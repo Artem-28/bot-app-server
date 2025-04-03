@@ -6,6 +6,7 @@ import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
 import { MessageSessionRepositoryDomain } from '@/repositories/message-session';
 import {
   IMessageSession,
+  IMessageSessionInstance,
   MessageSessionAggregate,
   MessageSessionEntity,
 } from '@/models/message-session';
@@ -18,7 +19,9 @@ export class MessageSessionRepository
   constructor(dataSource: DataSource, @Inject(REQUEST) request?: Request) {
     super(dataSource, request);
   }
-  async create(data: IMessageSession): Promise<MessageSessionAggregate> {
+  async create(
+    data: IMessageSessionInstance,
+  ): Promise<MessageSessionAggregate> {
     const result = await this.getRepository(MessageSessionEntity).save(data);
     return MessageSessionAggregate.create(result);
   }

@@ -1,29 +1,72 @@
 import { Injectable } from '@nestjs/common';
-import { ConnectionDto } from '@/modules/messenger/dto';
-import { FingerprintService } from '@/modules/fingerprint';
+import {
+  AuthMessengerDto,
+  OperatorConnectionDto,
+  RespondentConnectionDto,
+  SessionDto,
+} from '@/modules/messenger/dto';
 import { RespondentService } from '@/modules/respondent';
 import { ScriptRepository } from '@/repositories/script';
 import { CommonError, errors } from '@/common/error';
 import { MessageSessionRepository } from '@/repositories/message-session';
 import { MessageSessionAggregate } from '@/models/message-session';
 import { JwtService } from '@nestjs/jwt';
+import { MessengerConnectionRepository } from '@/repositories/messenger-connection';
+import { MessengerConnectionAggregate } from '@/models/messenger-connection';
+import { UserRepository } from '@/repositories/user';
 
 @Injectable()
 export class MessengerService {
   constructor(
     private readonly _jwtService: JwtService,
-    private readonly _fingerprintService: FingerprintService,
     private readonly _respondentService: RespondentService,
+    private readonly _userRepository: UserRepository,
     private readonly _scriptRepository: ScriptRepository,
     private readonly _messageSessionRepository: MessageSessionRepository,
+    private readonly _connectionRepository: MessengerConnectionRepository,
   ) {}
 
-  public async getConnectionData(dto: ConnectionDto) {
+  public async getConnectionToken(dto: AuthMessengerDto) {
     // Получаем скрипт
     const script = await this._scriptRepository.getOne({
       filter: [
-        { field: 'id', value: dto.scriptId },
-        { field: 'projectId', value: dto.projectId, operator: 'and' },
+        { field: 'id', value: dto.script_id },
+        { field: 'projectId', value: dto.project_id, operator: 'and' },
+      ],
+    });
+    // Если скрипт не был найден возврашаем ошибку
+    if (!script) {
+      throw new CommonError({ messages: errors.messenger.connect });
+    }
+    // Идентифицируем пользователя по отпечаткам
+    const respondent = await this._respondentService.respondentIdentity(
+      script.projectId,
+      dto.fingerprint,
+    );
+
+    return this._jwtService.sign({
+      respondent_id: respondent.id,
+      script_id: script.id,
+    });
+  }
+
+  public async actualSession(dto: SessionDto) {
+    // Ищем последнюю активную сессию
+    let session = await this._messageSessionRepository.getOne({
+      filter: [
+        { field: 'project_id', value: dto.project_id },
+        { field: 'script_id', value: dto.script_id, operator: 'and' },
+        { field: 'respondent_id', value: dto.respondent_id, operator: 'and' },
+      ],
+      relation: { name: 'respondent', method: 'leftJoinAndSelect' },
+    });
+
+    if (session) return session;
+
+    const script = await this._scriptRepository.getOne({
+      filter: [
+        { field: 'id', value: dto.script_id },
+        { field: 'projectId', value: dto.project_id, operator: 'and' },
       ],
     });
     // Если скрипт не был найден возврашаем ошибку
@@ -31,71 +74,56 @@ export class MessengerService {
       throw new CommonError({ messages: errors.messenger.connect });
     }
 
-    // Получаем отпечатки пользователя
-    const data = await this._fingerprintService.getFingerprint(
-      dto.fingerprint,
-      true,
+    const respondent = await this._respondentService.getRespondent(
+      dto.respondent_id,
+      script.projectId,
     );
-    const fingerprint = data.map((item) => item.fingerprint);
-
-    // Идентифицируем пользователя по отпечаткам
-    let respondent = await this._respondentService.respondentIdentity(
-      dto.projectId,
-      fingerprint,
-    );
-    let session: MessageSessionAggregate | null = null;
-    // Если не удалось идентифицировать пользователя
     if (!respondent) {
-      // Создаем пользователя с отпечатком
-      respondent = await this._respondentService.create({
-        projectId: dto.projectId,
-        name: 'respondent.new',
-        fingerprints: [dto.fingerprint],
-      });
-      // Создаем новую сессию для нового пользователя
-      session = await this._messageSessionRepository.create(
-        MessageSessionAggregate.create({
-          projectId: dto.projectId,
-          scriptId: dto.scriptId,
-          respondentId: respondent.id,
-          title: script.title,
-        }).instance,
-      );
+      throw new CommonError({ messages: errors.messenger.connect });
     }
 
-    // Если сессии нет то пользователь был идентифицирован
-    if (!session) {
-      // Ищем последнюю активную сессиию
-      session = await this._messageSessionRepository.getOne({
-        filter: [
-          { field: 'projectId', value: dto.projectId },
-          { field: 'scriptId', value: dto.scriptId, operator: 'and' },
-          { field: 'respondentId', value: respondent.id, operator: 'and' },
-        ],
-      });
-    }
+    // Создаем сессию для идентифицированного пользователя
+    const session_instance = MessageSessionAggregate.create({
+      project_id: script.projectId,
+      script_id: script.id,
+      respondent_id: respondent.id,
+      title: script.title,
+    }).instance;
 
-    // Если не нашли активной сессии
-    if (!session) {
-      // Создаем сессию для идентифицированного пользователя
-      session = await this._messageSessionRepository.create(
-        MessageSessionAggregate.create({
-          projectId: dto.projectId,
-          scriptId: dto.scriptId,
-          respondentId: respondent.id,
-          title: script.title,
-        }),
-      );
-    }
-    return { token: this._getSessionToken(session) };
+    session = await this._messageSessionRepository.create(session_instance);
+    session.update({ respondent });
+    return session;
   }
 
-  private _getSessionToken(session: MessageSessionAggregate) {
-    return this._jwtService.sign({
-      sessionId: session.id,
-      projectId: session.projectId,
-      scriptId: session.scriptId,
-      respondentId: session.respondentId,
+  public respondentConnect(dto: RespondentConnectionDto) {
+    const instance = MessengerConnectionAggregate.create(dto).instance;
+    return this._connectionRepository.create(instance);
+  }
+
+  public async operatorConnect(dto: OperatorConnectionDto) {
+    const user = await this._userRepository.getOne({
+      filter: { field: 'email', value: dto.operator_login },
     });
+
+    if (!user) {
+      throw new CommonError({ messages: errors.messenger.connect });
+    }
+    const instance = MessengerConnectionAggregate.create({
+      client_id: dto.client_id,
+      project_id: dto.project_id,
+      operator_id: user.id,
+    }).instance;
+
+    const connection = await this._connectionRepository.create(instance);
+    connection.update({ operator: user });
+
+    return connection;
+  }
+
+  public async disconnect(connection: MessengerConnectionAggregate) {
+    const result = await this._connectionRepository.remove({
+      filter: { field: 'id', value: connection.id },
+    });
+    return !!result.affected;
   }
 }

@@ -9,6 +9,7 @@ import { RespondentAggregate } from '@/models/respondent';
 import { CommonError, errors } from '@/common/error';
 import { IRespondentFingerprint } from '@/models/respondent-fingerprint';
 import { RespondentFingerprintRepository } from '@/repositories/respondent-fingerprint';
+import { hToArray } from '@/common/utils/formatter';
 
 @Injectable()
 export class RespondentService {
@@ -67,6 +68,15 @@ export class RespondentService {
     return respondent;
   }
 
+  public async getRespondent(id: number, projectId: number) {
+    return this._respondentRepository.getOne({
+      filter: [
+        { field: 'id', value: id },
+        { field: 'projectId', value: projectId },
+      ],
+    });
+  }
+
   public async respondentIdentity(
     projectId: number,
     fingerprint: string | string[],
@@ -77,7 +87,13 @@ export class RespondentService {
         { field: 'fingerprint', value: fingerprint, operator: 'and' },
       ],
     });
-    if (!respondentFingerprint) return null;
+    if (!respondentFingerprint) {
+      return this.create({
+        projectId,
+        name: 'respondent.new',
+        fingerprints: hToArray(fingerprint),
+      });
+    }
 
     return this._respondentRepository.getOne({
       filter: { field: 'id', value: respondentFingerprint.respondentId },

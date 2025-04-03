@@ -1,14 +1,33 @@
-import { IsDefined, IsNumber } from 'class-validator';
+import { IsDefined, IsNumber, IsString } from 'class-validator';
 
 export class ConnectionDto {
-  @IsNumber()
+  @IsString()
   @IsDefined()
-  projectId: number;
+  client_id: string;
 
   @IsNumber()
   @IsDefined()
-  scriptId: number;
+  project_id: number;
+}
 
+// export class RespondentConnectionDto extends ConnectionDto {
+//   @IsNumber()
+//   @IsDefined()
+//   script_id: number;
+//
+//   @IsNumber()
+//   @IsDefined()
+//   respondent_id: number;
+// }
+
+export class OperatorConnectionDto extends ConnectionDto {
+  @IsString()
   @IsDefined()
-  fingerprint: string;
+  operator_login: string;
+}
+
+export class RespondentConnectionDto extends ConnectionDto {
+  @IsNumber()
+  @IsDefined()
+  session_id: number;
 }

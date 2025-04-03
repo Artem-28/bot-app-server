@@ -1,18 +1,25 @@
 import { IBase } from '@/models/base';
+import {IRespondent, RespondentAggregate} from '@/models/respondent';
 
-export interface IMessageSession extends IBase {
+export interface IMessageSessionInstance extends IBase {
   /** Индификатор проекта */
-  projectId: number;
+  project_id: number;
 
   /** Индификатор скрипта */
-  scriptId: number;
+  script_id: number;
 
   /** Индификатор респондента */
-  respondentId: number;
+  respondent_id: number;
 
   /** Название сессии */
   title: string;
 
   /** Время окончания сессии */
-  endAt: Date | null;
+  end_at: Date | null;
 }
+
+export interface IMessageSessionRelation {
+  respondent: IRespondent | null;
+}
+
+export type IMessageSession = IMessageSessionInstance & IMessageSessionRelation;

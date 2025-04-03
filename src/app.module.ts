@@ -11,10 +11,10 @@ import { PermissionModule } from './modules/permission/permission.module';
 import { SubscriberModule } from './modules/subscriber/subscriber.module';
 import { ResourceModule } from './modules/resource/resource.module';
 import { ScriptModule } from './modules/script/script.module';
-import { RespondentModule } from './modules/respondent/respondent.module';
-import { ChatModule } from './modules/chat/chat.module';
+import { RespondentModule } from './modules/respondent';
 import { FingerprintModule } from '@/modules/fingerprint';
 import { MessengerModule } from '@/modules/messenger';
+import { WebsocketModule } from './modules/websocket';
 
 // Configuration
 
@@ -37,10 +37,9 @@ import { MessengerModule } from '@/modules/messenger';
     ResourceModule,
     ScriptModule,
     RespondentModule,
-    ChatModule,
     FingerprintModule,
     MessengerModule,
-    // ChatModule,
+    WebsocketModule,
   ],
   providers: [],
 })

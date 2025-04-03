@@ -8,11 +8,11 @@ import { RespondentService } from '@/modules/respondent';
 import { RespondentFingerprintRepository } from '@/repositories/respondent-fingerprint';
 import { ScriptRepository } from '@/repositories/script';
 import { MessageSessionRepository } from '@/repositories/message-session';
-import { MessengerWebsocket } from '@/modules/messenger/messenger.websocket';
+import { MessengerConnectionRepository } from '@/repositories/messenger-connection';
+import { UserRepository } from '@/repositories/user';
 
 @Module({
   providers: [
-    MessengerWebsocket,
     MessengerService,
     FingerprintService,
     RespondentService,
@@ -21,6 +21,8 @@ import { MessengerWebsocket } from '@/modules/messenger/messenger.websocket';
     RespondentRepository,
     ScriptRepository,
     MessageSessionRepository,
+    MessengerConnectionRepository,
+    UserRepository,
   ],
   controllers: [MessengerController],
 })
