@@ -1,10 +1,9 @@
 import { IBase } from '@/models/base';
+import { RespondentFingerprintAggregate } from '@/models/respondent-fingerprint';
 
-export interface IRespondent extends IBase {
+export interface IBaseRespondent extends IBase {
   /** Проект к которому привязан респондента */
   projectId: number;
-
-  fingerprintKey: string | null;
 
   /** Имя респондента */
   name: string | null;
@@ -20,4 +19,12 @@ export interface IRespondent extends IBase {
 
   /** Телефон респондента */
   phone: string | null;
+}
+
+export interface IRespondentRelation {
+  fingerprints: RespondentFingerprintAggregate[];
+}
+
+export interface IRespondent extends IBaseRespondent {
+  fingerprints: Partial<RespondentFingerprintAggregate>[];
 }

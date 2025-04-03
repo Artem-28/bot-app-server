@@ -30,14 +30,14 @@ export class FingerprintService {
     return this._fingerprintRepository.createFingerprintGroup(instance);
   }
 
-  public async createOrUpdateFingerprint(print: string) {
+  public async getFingerprint(print: string, full = false) {
     const fingerprint = await this._fingerprintRepository.getFingerprint({
       filter: { field: 'fingerprint', value: print },
     });
 
     if (!fingerprint) {
       const group = await this.createFingerprintGroup(print);
-      return group.fingerprints[0];
+      return group.fingerprints;
     }
 
     fingerprint.activity();
@@ -45,6 +45,14 @@ export class FingerprintService {
       print,
       fingerprint.instance,
     );
-    return fingerprint;
+
+    if (!full) return [fingerprint];
+
+    const group = await this._fingerprintRepository.getFingerprintGroup(
+      fingerprint.groupKey,
+    );
+    if (!group) return [fingerprint];
+    console.log(group);
+    return group.fingerprints;
   }
 }

@@ -7,6 +7,8 @@ import {
 } from 'class-validator';
 import { BaseAggregate } from '@/models/base';
 import { IRespondent } from '@/models/respondent/respondent.interface';
+import { RespondentFingerprintAggregate } from '@/models/respondent-fingerprint';
+import { Exclude } from 'class-transformer';
 
 export class RespondentAggregate
   extends BaseAggregate<IRespondent>
@@ -37,8 +39,8 @@ export class RespondentAggregate
   phone = null;
 
   @IsOptional()
-  @IsString()
-  fingerprintKey: string | null;
+  @Exclude()
+  fingerprints: RespondentFingerprintAggregate[];
 
   static create(data: Partial<IRespondent>) {
     const _entity = new RespondentAggregate();
@@ -46,10 +48,29 @@ export class RespondentAggregate
     return _entity;
   }
 
+  update(data: Partial<IRespondent>) {
+    const { fingerprints, ...params } = data;
+    super.update(params);
+    if (fingerprints) {
+      this.fingerprints = [];
+
+      fingerprints.forEach((print) => {
+        if (!print.fingerprint) return;
+
+        const fingerprint = RespondentFingerprintAggregate.create({
+          fingerprint: print.fingerprint,
+          projectId: this.projectId,
+          respondentId: this.id,
+        });
+
+        this.fingerprints.push(fingerprint);
+      });
+    }
+  }
+
   get instance(): IRespondent {
     return {
       projectId: this.projectId,
-      fingerprintKey: this.fingerprintKey,
       name: this.name,
       surname: this.surname,
       patronymic: this.patronymic,
@@ -57,6 +78,7 @@ export class RespondentAggregate
       phone: this.phone,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
+      fingerprints: this.fingerprints,
     };
   }
 }

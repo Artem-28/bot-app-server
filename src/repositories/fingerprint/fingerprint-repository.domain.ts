@@ -9,6 +9,8 @@ export abstract class FingerprintRepositoryDomain {
     data: IFingerprintGroup,
   ): Promise<FingerprintGroupAggregate>;
 
+  abstract getFingerprintGroup(key: string): Promise<FingerprintGroupAggregate>;
+
   abstract getFingerprint(
     options?: BuilderOptionsDto<IFingerprint>,
   ): Promise<FingerprintAggregate | null>;

@@ -1,10 +1,14 @@
 import { IRespondent } from '@/models/respondent';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDefined,
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
-export class UpdateRespondentDto
-  implements
-    Partial<Omit<IRespondent, 'projectId' | 'id' | 'createdAt' | 'updatedAt'>>
-{
+export class UpdateRespondentDto {
   @IsString()
   @IsOptional()
   name?: string | null;
@@ -24,4 +28,14 @@ export class UpdateRespondentDto
   @IsString()
   @IsOptional()
   phone?: string | null;
+}
+
+export class CreateRespondentDto extends UpdateRespondentDto {
+  @IsDefined()
+  @IsNumber()
+  projectId: number;
+
+  @IsOptional()
+  @IsArray()
+  fingerprints?: string[];
 }

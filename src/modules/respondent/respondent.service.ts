@@ -1,18 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { RespondentRepository } from '@/repositories/respondent';
 import { IProjectParam, IRespondentParam } from '@/common/types';
-import { UpdateRespondentDto } from '@/modules/respondent/dto';
+import {
+  CreateRespondentDto,
+  UpdateRespondentDto,
+} from '@/modules/respondent/dto';
 import { RespondentAggregate } from '@/models/respondent';
 import { CommonError, errors } from '@/common/error';
+import { IRespondentFingerprint } from '@/models/respondent-fingerprint';
+import { RespondentFingerprintRepository } from '@/repositories/respondent-fingerprint';
+import { hToArray } from '@/common/utils/formatter';
 
 @Injectable()
 export class RespondentService {
-  constructor(private readonly _respondentRepository: RespondentRepository) {}
+  constructor(
+    private readonly _respondentRepository: RespondentRepository,
+    private readonly _fingerprintRepository: RespondentFingerprintRepository,
+  ) {}
 
-  public create(param: IProjectParam, dto: UpdateRespondentDto) {
+  public create(dto: CreateRespondentDto) {
+    const fingerprints: Partial<IRespondentFingerprint>[] = [];
+    if (dto.fingerprints) {
+      dto.fingerprints.forEach((fingerprint) => {
+        fingerprints.push({ fingerprint });
+      });
+    }
     const respondent = RespondentAggregate.create({
-      projectId: Number(param.projectId),
       ...dto,
+      fingerprints,
     });
     return this._respondentRepository.create(respondent);
   }
@@ -51,5 +66,37 @@ export class RespondentService {
     }
 
     return respondent;
+  }
+
+  public async getRespondent(id: number, projectId: number) {
+    return this._respondentRepository.getOne({
+      filter: [
+        { field: 'id', value: id },
+        { field: 'projectId', value: projectId },
+      ],
+    });
+  }
+
+  public async respondentIdentity(
+    projectId: number,
+    fingerprint: string | string[],
+  ) {
+    const respondentFingerprint = await this._fingerprintRepository.getOne({
+      filter: [
+        { field: 'projectId', value: projectId },
+        { field: 'fingerprint', value: fingerprint, operator: 'and' },
+      ],
+    });
+    if (!respondentFingerprint) {
+      return this.create({
+        projectId,
+        name: 'respondent.new',
+        fingerprints: hToArray(fingerprint),
+      });
+    }
+
+    return this._respondentRepository.getOne({
+      filter: { field: 'id', value: respondentFingerprint.respondentId },
+    });
   }
 }
