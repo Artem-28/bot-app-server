@@ -27,7 +27,9 @@
     "module": "nest g module -- ./modules/$npm_config_name",
     "service": "nest g service -- ./modules/$npm_config_name",
     "module:create": "npm run module -- && npm run service -- && npm run controller --",
-    "seed:run": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run -d src/providers/typeorm/typeorm.config.ts"
+    "seed:run": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run -d src/providers/typeorm/typeorm.config.ts",
+    "database:reset": "node ./dist/data-base/data-base.reset.js",
+    "database:restart": "npm run database:reset && npm run migration:run && npm run seed:run"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -44,6 +46,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.7",
+    "glob": "^11.0.1",
     "mysql2": "^3.12.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

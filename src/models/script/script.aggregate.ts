@@ -8,7 +8,6 @@ import {
 import { DomainError } from '@/common/error';
 import { BaseAggregate } from '@/models/base';
 import { IScript } from '@/models/script/script.interface';
-import { UpdateScriptDto } from '@/modules/script/dto';
 
 export class ScriptAggregate extends BaseAggregate<IScript> implements IScript {
   @IsDefined()
