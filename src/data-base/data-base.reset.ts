@@ -1,5 +1,4 @@
-import { appDataSource, dataSourceOptions } from '@/providers/typeorm';
-import { glob } from 'glob';
+import { appDataSource } from '@/providers/typeorm';
 
 interface IMigration {
   id: number;
@@ -14,26 +13,6 @@ async function getMigrations(): Promise<IMigration[]> {
     );
   } catch (e) {
     throw new Error('Ошибка при получение списка миграций: ' + e);
-  }
-}
-
-async function getMigrationFiles() {
-  const migrationPaths = dataSourceOptions.migrations as string[];
-  if (!migrationPaths || migrationPaths.length === 0) {
-    throw new Error('Ошибка: Не указаны пути к файлам миграций.');
-  }
-  const filePaths: string[] = [];
-  migrationPaths.forEach((path) => {
-    filePaths.push(...glob.sync(path));
-  });
-
-  if (filePaths.length === 0) {
-    throw new Error('Ошибка: Не найдены файлы миграций');
-  }
-
-  for (let i = 0; i < filePaths.length; i++) {
-    const module = await import(filePaths[i]);
-    console.log(module);
   }
 }
 
