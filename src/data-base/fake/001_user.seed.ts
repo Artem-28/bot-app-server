@@ -57,9 +57,9 @@ export class UserSeed implements Seeder {
         email: data.email,
         name: data.name,
         phone: data.phone,
-        licenseAgreement: true,
-        lastActiveAt: new Date(),
-        emailVerifiedAt: new Date(),
+        license_agreement: true,
+        last_active_at: new Date(),
+        email_verified_at: new Date(),
       }).instance;
 
       await userRepository.save(userInstance);

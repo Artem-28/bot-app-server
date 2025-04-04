@@ -1,7 +1,8 @@
 import {
   IsDefined,
   IsNotEmpty,
-  IsNumber, IsOptional,
+  IsNumber,
+  IsOptional,
   IsString,
   validateSync,
 } from 'class-validator';
@@ -11,7 +12,7 @@ import { IRespondentFingerprint } from '@/models/respondent-fingerprint/responde
 export class RespondentFingerprintAggregate implements IRespondentFingerprint {
   @IsNumber()
   @IsOptional()
-  respondentId: number;
+  respondent_id: number;
 
   @IsString()
   @IsDefined()
@@ -20,7 +21,7 @@ export class RespondentFingerprintAggregate implements IRespondentFingerprint {
 
   @IsNumber()
   @IsDefined()
-  projectId: number;
+  project_id: number;
 
   static create(data: IRespondentFingerprint) {
     const _entity = new RespondentFingerprintAggregate();
@@ -44,9 +45,9 @@ export class RespondentFingerprintAggregate implements IRespondentFingerprint {
 
   get instance(): IRespondentFingerprint {
     return {
-      respondentId: this.respondentId,
+      respondent_id: this.respondent_id,
       fingerprint: this.fingerprint,
-      projectId: this.projectId,
+      project_id: this.project_id,
     };
   }
 }

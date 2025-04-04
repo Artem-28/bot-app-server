@@ -1,5 +1,3 @@
-import { IFingerprintGroup } from '@/models/fingerprint-group/fingerprint-group.interface';
-import { FingerprintAggregate } from '@/models/fingerprint';
 import {
   IsDefined,
   IsNotEmpty,
@@ -8,6 +6,8 @@ import {
   validateSync,
 } from 'class-validator';
 import { DomainError } from '@/common/error';
+import { IFingerprintGroup } from '@/models/fingerprint-group/fingerprint-group.interface';
+import { FingerprintAggregate } from '@/models/fingerprint';
 
 export class FingerprintGroupAggregate implements IFingerprintGroup {
   @IsString()
@@ -36,7 +36,7 @@ export class FingerprintGroupAggregate implements IFingerprintGroup {
 
     if (fingerprints && fingerprints.length) {
       this.fingerprints = fingerprints.map((print) =>
-        FingerprintAggregate.create({ ...print, groupKey: this.key }),
+        FingerprintAggregate.create({ ...print, group_key: this.key }),
       );
     }
 

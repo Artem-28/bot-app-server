@@ -40,7 +40,6 @@ export class RespondentRepository
   }
 
   update(id: number, data: Partial<IRespondent>): Promise<UpdateResult> {
-    console.log('DATA', data);
     return this.getRepository(RespondentEntity)
       .createQueryBuilder()
       .update()

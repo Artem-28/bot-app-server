@@ -30,8 +30,8 @@ export class SubscriberService {
 
     const subscriber = await this._subscriberRepository.create(
       SubscriberAggregate.create({
-        userId: user.id,
-        projectId: dto.projectId,
+        user_id: user.id,
+        project_id: dto.project_id,
       }),
     );
 
@@ -41,8 +41,8 @@ export class SubscriberService {
   public async checkExist(dto: ExistSubscriberDto, throwException = false) {
     const exist = await this._subscriberRepository.exist({
       filter: [
-        { field: 'projectId', value: dto.projectId },
-        { field: 'userId', value: dto.userId, operator: 'and' },
+        { field: 'project_id', value: dto.project_id },
+        { field: 'user_id', value: dto.user_id, operator: 'and' },
       ],
     });
 
@@ -56,8 +56,8 @@ export class SubscriberService {
   public async remove(dto: RemoveSubscriberDto) {
     const subscriber = await this._subscriberRepository.getOne({
       filter: [
-        { field: 'projectId', value: dto.projectId },
-        { field: 'id', value: dto.subscriberId, operator: 'and' },
+        { field: 'project_id', value: dto.project_id },
+        { field: 'id', value: dto.subscriber_id, operator: 'and' },
       ],
     });
 
@@ -66,7 +66,7 @@ export class SubscriberService {
     }
 
     const success = await this._subscriberRepository.remove({
-      filter: { field: 'id', value: dto.subscriberId },
+      filter: { field: 'id', value: dto.subscriber_id },
     });
 
     if (!success) {
@@ -80,8 +80,8 @@ export class SubscriberService {
   public async unsubscribe(dto: UnsubscribeDto) {
     const subscriber = await this._subscriberRepository.getOne({
       filter: [
-        { field: 'projectId', value: dto.projectId },
-        { field: 'userId', value: dto.userId, operator: 'and' },
+        { field: 'project_id', value: dto.project_id },
+        { field: 'user_id', value: dto.user_id, operator: 'and' },
       ],
     });
 
@@ -102,16 +102,16 @@ export class SubscriberService {
 
   public async projectSubscribers(projectId: number) {
     const subscribers = await this._subscriberRepository.getMany({
-      filter: { field: 'projectId', value: projectId },
+      filter: { field: 'project_id', value: projectId },
     });
     if (!subscribers.length) return [];
 
     const mapSubscribers = subscribers.reduce((acc, user) => {
-      acc[user.userId] = user;
+      acc[user.user_id] = user;
       return acc;
     }, {});
 
-    const userIds = subscribers.map((subscribe) => subscribe.userId);
+    const userIds = subscribers.map((subscribe) => subscribe.user_id);
     const users = await this._userRepository.getMany({
       filter: { field: 'id', value: userIds },
     });

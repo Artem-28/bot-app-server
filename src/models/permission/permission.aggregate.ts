@@ -16,7 +16,7 @@ export class PermissionAggregate implements IPermission {
 
   @IsEnum(PermissionEnum)
   @IsOptional()
-  parentCode: PermissionEnum = null;
+  parent_code: PermissionEnum = null;
 
   @IsDefined()
   @IsString()
@@ -28,8 +28,11 @@ export class PermissionAggregate implements IPermission {
   static create({ children, ...data }: Partial<IPermission>) {
     const _resource = new PermissionAggregate();
     Object.assign(_resource, data);
+
     if (children && children.length) {
-      _resource.children = children.map((item) => PermissionAggregate.create(item))
+      _resource.children = children.map((item) =>
+        PermissionAggregate.create(item),
+      );
     }
 
     const errors = validateSync(_resource, { whitelist: true });
@@ -43,7 +46,7 @@ export class PermissionAggregate implements IPermission {
   get instance(): IPermission {
     return {
       code: this.code,
-      parentCode: this.parentCode,
+      parent_code: this.parent_code,
       title: this.title,
     };
   }

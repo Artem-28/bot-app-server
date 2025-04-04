@@ -1,4 +1,3 @@
-import { BaseAggregate } from '@/models/base';
 import {
   IsDefined,
   IsNotEmpty,
@@ -6,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { RespondentAggregate } from '@/models/respondent';
+import { BaseAggregate } from '@/models/base';
 import { UserAggregate } from '@/models/user';
 import {
   IMessengerConnection,
@@ -56,8 +55,8 @@ export class MessengerConnectionAggregate
       project_id: this.project_id,
       session_id: this.session_id,
       operator_id: this.operator_id,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
     };
   }
 

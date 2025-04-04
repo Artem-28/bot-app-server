@@ -15,5 +15,5 @@ export class AuthDataEntity extends BaseEntity {
 
   @Column({ name: 'hash_token', nullable: true })
   @Exclude()
-  public hashToken: string;
+  public hash_token: string;
 }

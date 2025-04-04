@@ -9,5 +9,5 @@ export class UpdateProjectBodyDto {
 export class UpdateProjectDto extends UpdateProjectBodyDto {
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 }

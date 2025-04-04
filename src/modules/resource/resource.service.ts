@@ -7,7 +7,7 @@ export class ResourceService {
 
   public async permissions() {
     return this._permissionRepository.getMany({
-      filter: { field: 'parentCode', value: null },
+      filter: { field: 'parent_code', value: null },
       relation: { name: 'children', method: 'leftJoinAndSelect' },
     });
   }

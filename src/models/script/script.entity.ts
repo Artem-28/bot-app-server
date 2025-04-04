@@ -6,7 +6,7 @@ export const SCRIPT_TABLE = 'scripts';
 @Entity({ name: SCRIPT_TABLE })
 export class ScriptEntity extends BaseEntity {
   @Column({ name: 'project_id' })
-  public projectId: number;
+  public project_id: number;
 
   @Column()
   public title: string;

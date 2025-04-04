@@ -28,7 +28,7 @@ export class PermissionEntity {
     enumName: 'permission_enum',
     nullable: true,
   })
-  public parentCode: PermissionEnum;
+  public parent_code: PermissionEnum;
 
   @Column()
   public title: string;
@@ -37,7 +37,7 @@ export class PermissionEntity {
   public children: PermissionEntity[];
 
   @OneToMany(() => UserPermissionEntity, (permission) => permission.permission)
-  public userPermissions: UserPermissionEntity[];
+  public user_permissions: UserPermissionEntity[];
 
   @ManyToOne(() => PermissionEntity, (permission) => permission.children, {
     onDelete: 'CASCADE',

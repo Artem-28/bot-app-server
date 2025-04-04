@@ -3,9 +3,9 @@ import { IsDefined, IsNumber } from 'class-validator';
 export class RemoveSubscriberDto {
   @IsDefined()
   @IsNumber()
-  subscriberId: number;
+  subscriber_id: number;
 
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 }

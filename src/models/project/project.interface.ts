@@ -1,8 +1,8 @@
-import { IBase } from '@/models/base';
+import { IBaseEntity } from '@/models/base';
 
-export interface IProject extends IBase {
+export interface IProject extends IBaseEntity {
   /** Идентификатор пользователя (владельца проекта) */
-  ownerId: number;
+  owner_id: number;
   /** Название проекта */
   title: string;
 }

@@ -17,13 +17,13 @@ export class FingerprintAggregate implements IFingerprint {
   @IsString()
   @IsDefined()
   @IsNotEmpty()
-  groupKey: string;
+  group_key: string;
 
   @IsDate()
-  lastActiveAt = new Date();
+  last_active_at = new Date();
 
   @IsDate()
-  createdAt = new Date();
+  created_at = new Date();
 
   static create(data: Partial<IFingerprint>) {
     const _entity = new FingerprintAggregate();
@@ -48,13 +48,13 @@ export class FingerprintAggregate implements IFingerprint {
   get instance(): IFingerprint {
     return {
       fingerprint: this.fingerprint,
-      groupKey: this.groupKey,
-      lastActiveAt: this.lastActiveAt,
-      createdAt: this.createdAt,
+      group_key: this.group_key,
+      last_active_at: this.last_active_at,
+      created_at: this.created_at,
     };
   }
 
   activity() {
-    this.lastActiveAt = new Date();
+    this.last_active_at = new Date();
   }
 }

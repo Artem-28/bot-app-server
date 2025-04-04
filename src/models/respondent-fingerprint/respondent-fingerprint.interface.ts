@@ -1,5 +1,5 @@
 export interface IRespondentFingerprint {
-  respondentId: number;
-  projectId: number;
+  respondent_id: number;
+  project_id: number;
   fingerprint: string;
 }

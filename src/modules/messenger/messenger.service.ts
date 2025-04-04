@@ -31,7 +31,7 @@ export class MessengerService {
     const script = await this._scriptRepository.getOne({
       filter: [
         { field: 'id', value: dto.script_id },
-        { field: 'projectId', value: dto.project_id, operator: 'and' },
+        { field: 'project_id', value: dto.project_id, operator: 'and' },
       ],
     });
     // Если скрипт не был найден возврашаем ошибку
@@ -40,7 +40,7 @@ export class MessengerService {
     }
     // Идентифицируем пользователя по отпечаткам
     const respondent = await this._respondentService.respondentIdentity(
-      script.projectId,
+      script.project_id,
       dto.fingerprint,
     );
 
@@ -66,7 +66,7 @@ export class MessengerService {
     const script = await this._scriptRepository.getOne({
       filter: [
         { field: 'id', value: dto.script_id },
-        { field: 'projectId', value: dto.project_id, operator: 'and' },
+        { field: 'project_id', value: dto.project_id, operator: 'and' },
       ],
     });
     // Если скрипт не был найден возврашаем ошибку
@@ -76,7 +76,7 @@ export class MessengerService {
 
     const respondent = await this._respondentService.getRespondent(
       dto.respondent_id,
-      script.projectId,
+      script.project_id,
     );
     if (!respondent) {
       throw new CommonError({ messages: errors.messenger.connect });
@@ -84,7 +84,7 @@ export class MessengerService {
 
     // Создаем сессию для идентифицированного пользователя
     const session_instance = MessageSessionAggregate.create({
-      project_id: script.projectId,
+      project_id: script.project_id,
       script_id: script.id,
       respondent_id: respondent.id,
       title: script.title,

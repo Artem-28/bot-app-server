@@ -1,4 +1,4 @@
-import { IBase } from '@/models/base';
+import { IBaseEntity} from '@/models/base';
 
 export enum ConfirmCodeTypeEnum {
   REGISTRATION = 'registration',
@@ -13,7 +13,7 @@ export interface IValidateCodeResponse {
 
 export type TValidateCodeField = keyof IValidateCodeResponse;
 
-export interface IConfirmCode extends IBase {
+export interface IConfirmCode extends IBaseEntity {
   /** Значение кода */
   value: string;
 
@@ -24,8 +24,8 @@ export interface IConfirmCode extends IBase {
   destination: string;
 
   /** Срок действия кода */
-  liveAt: Date;
+  live_at: Date;
 
   /** Задержка для отправки */
-  delayAt: Date;
+  delay_at: Date;
 }

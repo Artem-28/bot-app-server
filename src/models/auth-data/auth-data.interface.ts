@@ -1,6 +1,6 @@
-import { IBase } from '@/models/base';
+import { IBaseEntity } from '@/models/base';
 
-export interface IAuthData extends IBase {
+export interface IAuthData extends IBaseEntity {
   /** Логин пользователя */
   login: string;
 
@@ -8,5 +8,5 @@ export interface IAuthData extends IBase {
   password: string;
 
   /** Токен авторизации пользователя */
-  hashToken: string | null;
+  hash_token: string | null;
 }

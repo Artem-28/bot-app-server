@@ -13,12 +13,12 @@ export class PermissionSeed implements Seeder {
       const code = PermissionEnum[key];
       const value = code.split('_')[1];
       const inx = accessPermission.indexOf(`access_${value}`);
-      let parentCode = (accessPermission[inx] as PermissionEnum) || null;
-      if (code === parentCode) parentCode = null;
+      let parent_code = (accessPermission[inx] as PermissionEnum) || null;
+      if (code === parent_code) parent_code = null;
 
       return PermissionAggregate.create({
         code,
-        parentCode,
+        parent_code,
         title: `permissions.${code}`,
       }).instance;
     });

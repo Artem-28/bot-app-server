@@ -6,7 +6,7 @@ export const PROJECT_TABLE = 'projects';
 @Entity({ name: PROJECT_TABLE })
 export class ProjectEntity extends BaseEntity {
   @Column({ name: 'owner_id' })
-  public ownerId: number;
+  public owner_id: number;
 
   @Column()
   public title: string;

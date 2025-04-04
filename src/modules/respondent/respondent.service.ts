@@ -34,7 +34,7 @@ export class RespondentService {
 
   public projectRespondents(param: IProjectParam) {
     return this._respondentRepository.getMany({
-      filter: { field: 'projectId', value: param.projectId },
+      filter: { field: 'project_id', value: param.projectId },
     });
   }
 
@@ -42,7 +42,7 @@ export class RespondentService {
     const respondent = await this._respondentRepository.getOne({
       filter: [
         { field: 'id', value: param.respondentId },
-        { field: 'projectId', value: param.projectId, operator: 'and' },
+        { field: 'project_id', value: param.projectId, operator: 'and' },
       ],
     });
 
@@ -72,7 +72,7 @@ export class RespondentService {
     return this._respondentRepository.getOne({
       filter: [
         { field: 'id', value: id },
-        { field: 'projectId', value: projectId },
+        { field: 'project_id', value: projectId },
       ],
     });
   }
@@ -83,20 +83,20 @@ export class RespondentService {
   ) {
     const respondentFingerprint = await this._fingerprintRepository.getOne({
       filter: [
-        { field: 'projectId', value: projectId },
+        { field: 'project_id', value: projectId },
         { field: 'fingerprint', value: fingerprint, operator: 'and' },
       ],
     });
     if (!respondentFingerprint) {
       return this.create({
-        projectId,
+        project_id: projectId,
         name: 'respondent.new',
         fingerprints: hToArray(fingerprint),
       });
     }
 
     return this._respondentRepository.getOne({
-      filter: { field: 'id', value: respondentFingerprint.respondentId },
+      filter: { field: 'id', value: respondentFingerprint.respondent_id },
     });
   }
 }

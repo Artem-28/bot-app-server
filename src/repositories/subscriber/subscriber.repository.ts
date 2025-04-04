@@ -59,13 +59,13 @@ export class SubscriberRepository
   }
 
   async unsubscribe(
-    data: Pick<ISubscriber, 'projectId' | 'userId'>,
+    data: Pick<ISubscriber, 'project_id' | 'user_id'>,
   ): Promise<boolean> {
     const repository = this.getRepository(SubscriberEntity);
     const query = HQueryBuilder.delete(repository, {
       filter: [
-        { field: 'userId', value: data.userId },
-        { field: 'projectId', value: data.projectId, operator: 'and' },
+        { field: 'user_id', value: data.user_id },
+        { field: 'project_id', value: data.project_id, operator: 'and' },
       ],
     });
     const result = await query.builder.execute();

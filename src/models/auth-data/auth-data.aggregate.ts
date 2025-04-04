@@ -1,14 +1,7 @@
 import { IAuthData } from '@/models/auth-data/auth-data.interface';
-import {
-  IsDefined,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  validateSync,
-} from 'class-validator';
-import { BaseAggregate } from '@/models/base';
+import { IsDefined, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Exclude } from 'class-transformer';
-import { DomainError } from '@/common/error';
+import { BaseAggregate } from '@/models/base';
 
 export class AuthDataAggregate
   extends BaseAggregate<IAuthData>
@@ -27,16 +20,11 @@ export class AuthDataAggregate
 
   @IsOptional()
   @Exclude()
-  hashToken: string | null;
+  hash_token: string | null;
 
   static create(data: Partial<IAuthData>) {
     const _entity = new AuthDataAggregate();
-    Object.assign(_entity, data);
-    _entity.createdAt = data?.id ? _entity.createdAt : new Date();
-    const errors = validateSync(_entity, { whitelist: true });
-    if (!!errors.length) {
-      throw new DomainError(errors);
-    }
+    _entity.update(data);
     return _entity;
   }
 
@@ -44,9 +32,9 @@ export class AuthDataAggregate
     return {
       login: this.login,
       password: this.password,
-      hashToken: this.hashToken,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      hash_token: this.hash_token,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
     };
   }
 }

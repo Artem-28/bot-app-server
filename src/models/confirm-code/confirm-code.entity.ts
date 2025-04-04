@@ -20,8 +20,8 @@ export class ConfirmCodeEntity extends BaseEntity {
   destination: string;
 
   @Column({ name: 'live_at' })
-  liveAt: Date;
+  live_at: Date;
 
   @Column({ name: 'delay_at' })
-  delayAt: Date;
+  delay_at: Date;
 }

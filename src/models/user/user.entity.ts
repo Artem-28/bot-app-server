@@ -15,14 +15,14 @@ export class UserEntity extends BaseEntity {
   public phone: string;
 
   @Column({ name: 'license_agreement' })
-  public licenseAgreement: boolean;
+  public license_agreement: boolean;
 
   @Column({ name: 'email_verified_at', nullable: true })
-  public emailVerifiedAt: Date;
+  public email_verified_at: Date;
 
   @Column({ name: 'phone_verified_at', nullable: true })
-  public phoneVerifiedAt: Date;
+  public phone_verified_at: Date;
 
   @Column({ name: 'last_active_at', nullable: true })
-  public lastActiveAt: Date;
+  public last_active_at: Date;
 }

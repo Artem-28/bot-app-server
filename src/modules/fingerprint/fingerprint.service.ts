@@ -49,10 +49,9 @@ export class FingerprintService {
     if (!full) return [fingerprint];
 
     const group = await this._fingerprintRepository.getFingerprintGroup(
-      fingerprint.groupKey,
+      fingerprint.group_key,
     );
     if (!group) return [fingerprint];
-    console.log(group);
     return group.fingerprints;
   }
 }

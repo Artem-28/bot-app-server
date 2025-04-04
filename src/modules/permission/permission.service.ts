@@ -18,16 +18,16 @@ export class PermissionService {
 
     const data = dto.permissions.map((code) =>
       UserPermissionAggregate.create({
-        projectId: dto.projectId,
-        userId: dto.userId,
+        project_id: dto.project_id,
+        user_id: dto.user_id,
         code,
       }),
     );
 
     const removed = await this._userPermissionRepository.remove({
       filter: [
-        { field: 'projectId', value: dto.projectId },
-        { field: 'userId', value: dto.userId, operator: 'and' },
+        { field: 'project_id', value: dto.project_id },
+        { field: 'user_id', value: dto.user_id, operator: 'and' },
       ],
     });
 
@@ -40,8 +40,8 @@ export class PermissionService {
     }
 
     return {
-      projectId: dto.projectId,
-      userId: dto.userId,
+      projectId: dto.project_id,
+      userId: dto.user_id,
       permissions: permissions.map((p) => p.code),
     };
   }
@@ -49,13 +49,13 @@ export class PermissionService {
   public async list(dto: GetPermissionDto) {
     const permissions = await this._userPermissionRepository.getMany({
       filter: [
-        { field: 'projectId', value: dto.projectId },
-        { field: 'userId', value: dto.userId },
+        { field: 'project_id', value: dto.project_id },
+        { field: 'user_id', value: dto.user_id },
       ],
     });
     return {
-      projectId: dto.projectId,
-      userId: dto.userId,
+      projectId: dto.project_id,
+      userId: dto.user_id,
       permissions: permissions.map((p) => p.code),
     };
   }
@@ -63,15 +63,15 @@ export class PermissionService {
   public async remove(dto: UpdatePermissionDto) {
     return await this._userPermissionRepository.remove({
       filter: [
-        { field: 'projectId', value: dto.projectId },
-        { field: 'userId', value: dto.userId, operator: 'and' },
+        { field: 'project_id', value: dto.project_id },
+        { field: 'user_id', value: dto.user_id, operator: 'and' },
       ],
     });
   }
 
   public async removeProjectPermissions(projectId: number | string) {
     return await this._userPermissionRepository.remove({
-      filter: { field: 'projectId', value: projectId },
+      filter: { field: 'project_id', value: projectId },
     });
   }
 }

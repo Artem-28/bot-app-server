@@ -11,13 +11,13 @@ import { PermissionEntity } from '@/models/permission/permission.entity';
 export const USER_PERMISSION_TABLE = 'user_permissions';
 
 @Entity({ name: USER_PERMISSION_TABLE })
-@Unique(['userId', 'projectId', 'code'])
+@Unique(['user_id', 'project_id', 'code'])
 export class UserPermissionEntity {
   @PrimaryColumn({ name: 'user_id' })
-  public userId: number;
+  public user_id: number;
 
   @PrimaryColumn({ name: 'project_id' })
-  public projectId: number;
+  public project_id: number;
 
   @PrimaryColumn({
     type: 'enum',
@@ -28,7 +28,7 @@ export class UserPermissionEntity {
 
   @ManyToOne(
     () => PermissionEntity,
-    (permission) => permission.userPermissions,
+    (permission) => permission.user_permissions,
     {
       onDelete: 'CASCADE',
     },

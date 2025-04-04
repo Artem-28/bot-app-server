@@ -1,7 +1,7 @@
 import { PermissionEnum } from '@/providers/permission';
 
 export interface IUserPermission {
-  userId: number;
-  projectId: number;
+  user_id: number;
+  project_id: number;
   code: PermissionEnum;
 }

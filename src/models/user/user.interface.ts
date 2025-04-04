@@ -1,6 +1,6 @@
-import { IBase } from '@/models/base';
+import { IBaseEntity} from '@/models/base';
 
-export interface IUser extends IBase {
+export interface IUser extends IBaseEntity {
   /** Имя пользователя */
   name: string;
   /** Email пользователя */
@@ -10,14 +10,14 @@ export interface IUser extends IBase {
   phone: string | null;
 
   /** Согласие на персональне данные */
-  licenseAgreement: boolean;
+  license_agreement: boolean;
 
   /** Дата подтверждение email */
-  emailVerifiedAt: Date | null;
+  email_verified_at: Date | null;
 
   /** Дата подтверждения телефона */
-  phoneVerifiedAt: Date | null;
+  phone_verified_at: Date | null;
 
   /** Дата последней активности пользователя */
-  lastActiveAt: Date | null;
+  last_active_at: Date | null;
 }

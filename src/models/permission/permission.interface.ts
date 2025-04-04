@@ -3,7 +3,7 @@ import { PermissionEnum } from '@/providers/permission';
 export interface IPermission {
   code: PermissionEnum;
 
-  parentCode: PermissionEnum | null;
+  parent_code: PermissionEnum | null;
 
   title: string;
 

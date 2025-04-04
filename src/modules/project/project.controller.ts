@@ -62,7 +62,7 @@ export class ProjectController {
     @Body() body: UpdateProjectBodyDto,
   ) {
     return await this.projectService.update({
-      projectId: Number(projectId),
+      project_id: Number(projectId),
       ...body,
     });
   }
@@ -86,12 +86,12 @@ export class ProjectController {
     @Body() body: ChangeOwnerBodyDto,
   ) {
     const project = await this.projectService.changeOwner({
-      projectId: Number(projectId),
+      project_id: Number(projectId),
       ...body,
     });
     await this.permissionService.update({
-      projectId: project.id,
-      userId: project.ownerId,
+      project_id: project.id,
+      user_id: project.owner_id,
       permissions: [],
     });
 

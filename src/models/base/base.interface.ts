@@ -1,5 +1,5 @@
-export interface IBase {
+export interface IBaseEntity {
   id?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  crated_at: Date;
+  updated_at: Date;
 }

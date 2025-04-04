@@ -3,15 +3,15 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IBase } from '@/models/base/base.interface';
+import { IBaseEntity} from '@/models/base/base.interface';
 
-export abstract class BaseEntity implements IBase {
+export abstract class BaseEntity implements IBaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  crated_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updated_at: Date;
 }

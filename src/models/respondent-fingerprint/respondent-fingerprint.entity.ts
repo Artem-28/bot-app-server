@@ -6,13 +6,13 @@ export const RESPONDENT_FINGERPRINT_TABLE = 'respondent_fingerprints';
 @Entity({ name: RESPONDENT_FINGERPRINT_TABLE })
 export class RespondentFingerprintEntity {
   @PrimaryColumn({ name: 'respondent_id' })
-  public respondentId: number;
+  public respondent_id: number;
 
   @PrimaryColumn()
   public fingerprint: string;
 
   @Column({ name: 'project_id' })
-  public projectId: number;
+  public project_id: number;
 
   @ManyToOne(() => RespondentEntity, (respondent) => respondent.fingerprints, {
     eager: true,

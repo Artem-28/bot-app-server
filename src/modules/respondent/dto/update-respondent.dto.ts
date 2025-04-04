@@ -1,4 +1,3 @@
-import { IRespondent } from '@/models/respondent';
 import {
   IsArray,
   IsDefined,
@@ -33,7 +32,7 @@ export class UpdateRespondentDto {
 export class CreateRespondentDto extends UpdateRespondentDto {
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 
   @IsOptional()
   @IsArray()

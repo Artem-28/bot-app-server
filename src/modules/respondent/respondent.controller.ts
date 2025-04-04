@@ -41,9 +41,9 @@ export class RespondentController {
     @Param() param: IProjectParam,
     @Body() body: UpdateRespondentDto,
   ) {
-    const projectId = Number(param.projectId);
+    const project_id = Number(param.projectId);
     return await this.respondentService.create({
-      projectId,
+      project_id,
       ...body,
     });
   }

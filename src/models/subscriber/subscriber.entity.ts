@@ -4,11 +4,11 @@ import { BaseEntity } from '@/models/base';
 export const SUBSCRIBER_TABLE = 'subscribers';
 
 @Entity({ name: SUBSCRIBER_TABLE })
-@Unique(['userId', 'projectId'])
+@Unique(['user_id', 'project_id'])
 export class SubscriberEntity extends BaseEntity {
   @Column({ name: 'user_id' })
-  public userId: number;
+  public user_id: number;
 
   @Column({ name: 'project_id' })
-  public projectId: number;
+  public project_id: number;
 }

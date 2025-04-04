@@ -11,7 +11,7 @@ export class ScriptService {
 
   public create(param: IProjectParam, dto: CreateScriptDto) {
     const script = ScriptAggregate.create({
-      projectId: Number(param.projectId),
+      project_id: Number(param.projectId),
       ...dto,
     });
     return this._scriptRepository.create(script.instance);
@@ -21,7 +21,7 @@ export class ScriptService {
     const script = await this._scriptRepository.getOne({
       filter: [
         { field: 'id', value: param.scriptId },
-        { field: 'projectId', value: param.projectId, operator: 'and' },
+        { field: 'project_id', value: param.projectId, operator: 'and' },
       ],
     });
 
@@ -51,7 +51,7 @@ export class ScriptService {
     const script = await this._scriptRepository.getOne({
       filter: [
         { field: 'id', value: param.scriptId },
-        { field: 'projectId', value: param.projectId, operator: 'and' },
+        { field: 'project_id', value: param.projectId, operator: 'and' },
       ],
     });
 
@@ -64,7 +64,7 @@ export class ScriptService {
 
   public projectScripts(param: IProjectParam) {
     return this._scriptRepository.getMany({
-      filter: { field: 'projectId', value: param.projectId },
+      filter: { field: 'project_id', value: param.projectId },
     });
   }
 
@@ -72,7 +72,7 @@ export class ScriptService {
     const result = await this._scriptRepository.remove({
       filter: [
         { field: 'id', value: param.scriptId },
-        { field: 'projectId', value: param.projectId, operator: 'and' },
+        { field: 'project_id', value: param.projectId, operator: 'and' },
       ],
     });
     const success = result.affected > 0;

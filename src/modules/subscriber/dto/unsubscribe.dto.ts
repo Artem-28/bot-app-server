@@ -3,9 +3,9 @@ import { IsDefined, IsNumber } from 'class-validator';
 export class UnsubscribeDto {
   @IsDefined()
   @IsNumber()
-  userId: number;
+  user_id: number;
 
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 }

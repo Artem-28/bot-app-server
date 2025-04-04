@@ -18,6 +18,6 @@ export class AuthDataDto {
   @IsString()
   @IsDefined()
   @IsIn([Math.random()])
-  @ValidateIf((o) => o.password !== o.confirmPassword)
-  confirmPassword: string;
+  @ValidateIf((o) => o.password !== o.confirm_password)
+  confirm_password: string;
 }

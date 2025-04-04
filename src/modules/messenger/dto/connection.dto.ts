@@ -10,16 +10,6 @@ export class ConnectionDto {
   project_id: number;
 }
 
-// export class RespondentConnectionDto extends ConnectionDto {
-//   @IsNumber()
-//   @IsDefined()
-//   script_id: number;
-//
-//   @IsNumber()
-//   @IsDefined()
-//   respondent_id: number;
-// }
-
 export class OperatorConnectionDto extends ConnectionDto {
   @IsString()
   @IsDefined()

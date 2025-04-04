@@ -5,9 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  validateSync,
 } from 'class-validator';
-import { DomainError } from '@/common/error';
 import { BaseAggregate } from '@/models/base';
 import {
   ISubscriber,
@@ -21,30 +19,25 @@ export class SubscriberAggregate
 {
   @IsDefined()
   @IsNumber()
-  userId: number;
+  user_id: number;
 
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 
   static create(data: Partial<ISubscriber>) {
-    const _subscriber = new SubscriberAggregate();
-    Object.assign(_subscriber, data);
-    _subscriber.updatedAt = data?.id ? new Date() : _subscriber.updatedAt;
-    const errors = validateSync(_subscriber, { whitelist: true });
-    if (!!errors.length) {
-      throw new DomainError(errors);
-    }
-    return _subscriber;
+    const _entity = new SubscriberAggregate();
+    _entity.update(data);
+    return _entity;
   }
 
   get instance(): ISubscriber {
     return {
       id: this.id,
-      userId: this.userId,
-      projectId: this.projectId,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      user_id: this.user_id,
+      project_id: this.project_id,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
     };
   }
 }
@@ -55,11 +48,11 @@ export class SubscriberUser
 {
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 
   @IsDefined()
   @IsNumber()
-  userId: number;
+  user_id: number;
 
   @IsDefined()
   @IsEmail()
@@ -67,21 +60,17 @@ export class SubscriberUser
 
   @IsOptional()
   @IsDate()
-  lastActiveAt: Date | null = null;
+  last_active_at: Date | null = null;
 
   @IsString()
   @IsDefined()
   name: string;
 
   static create(subscriber: ISubscriber, user: IUser) {
-    const _subscriberUser = new SubscriberUser();
-    const { name, email, lastActiveAt } = user;
-    Object.assign(_subscriberUser, subscriber, { name, email, lastActiveAt });
+    const _entity = new SubscriberUser();
+    const { name, email, last_active_at } = user;
+    _entity.update({ ...subscriber, name, email, last_active_at });
 
-    const errors = validateSync(_subscriberUser, { whitelist: true });
-    if (!!errors.length) {
-      throw new DomainError(errors);
-    }
-    return _subscriberUser;
+    return _entity;
   }
 }

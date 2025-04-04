@@ -10,7 +10,7 @@ export class FingerprintGroupEntity {
 
   @OneToMany(
     () => FingerprintEntity,
-    (fingerprint) => fingerprint.fingerprintGroup,
+    (fingerprint) => fingerprint.fingerprint_group,
     { cascade: true },
   )
   @JoinColumn({ name: 'key', referencedColumnName: 'group_key' })

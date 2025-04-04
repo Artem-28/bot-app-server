@@ -1,9 +1,9 @@
-import { IsDefined, IsNumber, IsString, validateSync } from 'class-validator';
-import { DomainError } from '@/common/error';
+import { IsDefined, IsNumber, IsString } from 'class-validator';
+import { Exclude } from 'class-transformer';
 import { IProject } from '@/models/project/project.interface';
 import { BaseAggregate } from '@/models/base';
 import { IUser } from '@/models/user';
-import { Exclude } from 'class-transformer';
+
 
 export class ProjectAggregate
   extends BaseAggregate<IProject>
@@ -12,7 +12,7 @@ export class ProjectAggregate
   @IsDefined()
   @IsNumber()
   @Exclude()
-  ownerId: number;
+  owner_id: number;
 
   @IsDefined()
   @IsString()
@@ -21,30 +21,23 @@ export class ProjectAggregate
   owner: Partial<IUser>;
 
   static create(data: Partial<IProject>) {
-    const _project = new ProjectAggregate();
-    Object.assign(_project, data);
-    _project.createdAt = data?.id ? _project.createdAt : new Date();
-    const errors = validateSync(_project, { whitelist: true });
-    if (!!errors.length) {
-      throw new DomainError(errors);
-    }
-
-    Object.assign(_project, { owner: { id: _project.ownerId } });
-    return _project;
+    const _entity = new ProjectAggregate();
+    _entity.update(data)
+    return _entity;
   }
 
   public setOwner(user: IUser) {
-    this.ownerId = user.id;
+    this.owner_id = user.id;
     Object.assign(this.owner, user);
   }
 
   get instance(): IProject {
     return {
       id: this.id,
-      ownerId: this.ownerId,
+      owner_id: this.owner_id,
       title: this.title,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
     };
   }
 }

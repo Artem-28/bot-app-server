@@ -1,8 +1,8 @@
-import { IBase } from '@/models/base';
+import { IBaseEntity } from '@/models/base';
 
-export interface IScript extends IBase {
+export interface IScript extends IBaseEntity {
   /** Идентификатор проекта к которому привязан скрипт */
-  projectId: number;
+  project_id: number;
   /** Название скрипта */
   title: string;
 }

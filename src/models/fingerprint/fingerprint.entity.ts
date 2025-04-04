@@ -16,13 +16,13 @@ export class FingerprintEntity {
   public fingerprint: string;
 
   @PrimaryColumn({ name: 'group_key' })
-  public groupKey: string;
+  public group_key: string;
 
   @Column({ name: 'last_active_at' })
-  public lastActiveAt: Date;
+  public last_active_at: Date;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  created_at: Date;
 
   @ManyToOne(
     () => FingerprintGroupEntity,
@@ -30,5 +30,5 @@ export class FingerprintEntity {
     { eager: true },
   )
   @JoinColumn({ name: 'group_key', referencedColumnName: 'key' })
-  fingerprintGroup: FingerprintGroupEntity;
+  fingerprint_group: FingerprintGroupEntity;
 }

@@ -1,7 +1,7 @@
-import { IBase } from '@/models/base';
-import {IRespondent, RespondentAggregate} from '@/models/respondent';
+import { IBaseEntity } from '@/models/base';
+import { IRespondent } from '@/models/respondent';
 
-export interface IMessageSessionInstance extends IBase {
+export interface IMessageSessionInstance extends IBaseEntity {
   /** Индификатор проекта */
   project_id: number;
 

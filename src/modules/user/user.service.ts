@@ -10,7 +10,7 @@ export class UserService {
   constructor(private readonly _userRepository: UserRepository) {}
 
   public async create(dto: CreateUserDto): Promise<UserAggregate> {
-    if (!dto.licenseAgreement) {
+    if (!dto.license_agreement) {
       throw new CommonError({ messages: errors.sign_up.license_agreement });
     }
 

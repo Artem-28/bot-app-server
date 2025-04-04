@@ -23,16 +23,16 @@ export class ProjectService {
   public async create(dto: CreateProjectDto) {
     const { owner, ...payload } = dto;
     const project = await this._projectRepository.create(
-      ProjectAggregate.create({ ...payload, ownerId: owner.id }).instance,
+      ProjectAggregate.create({ ...payload, owner_id: owner.id }).instance,
     );
     project.setOwner(owner);
     return project;
   }
 
   public async update(dto: UpdateProjectDto) {
-    const { projectId, ...payload } = dto;
+    const { project_id, ...payload } = dto;
     const project = await this._projectRepository.getOne({
-      filter: { field: 'id', value: projectId },
+      filter: { field: 'id', value: project_id },
     });
 
     if (!project) {
@@ -58,7 +58,7 @@ export class ProjectService {
   public async changeOwner(dto: ChangeOwnerDto) {
     // Получаем нового владельца проекта
     const user = await this._userRepository.getOne({
-      filter: { field: 'email', value: dto.ownerEmail },
+      filter: { field: 'email', value: dto.owner_email },
     });
 
     // Если нет такого пользователя возвращаем ошибку
@@ -68,7 +68,7 @@ export class ProjectService {
 
     // Получаем проект
     const project = await this._projectRepository.getOne({
-      filter: { field: 'id', value: dto.projectId },
+      filter: { field: 'id', value: dto.project_id },
     });
 
     // Если такого проекта нет возвращаем ошибку
@@ -95,8 +95,8 @@ export class ProjectService {
 
     // Удаляем пользователя из подписчиков на этом проекте если он им был
     await this._subscriberRepository.unsubscribe({
-      projectId: project.id,
-      userId: user.id,
+      project_id: project.id,
+      user_id: user.id,
     });
 
     return project;
@@ -114,7 +114,7 @@ export class ProjectService {
     }
 
     const user = await this._userRepository.getOne({
-      filter: { field: 'id', value: project.ownerId },
+      filter: { field: 'id', value: project.owner_id },
     });
 
     if (user) project.setOwner(user);
@@ -124,17 +124,17 @@ export class ProjectService {
 
   public async viewProjects(userId: number) {
     const subscribeProjects = await this._subscriberRepository.getMany({
-      filter: { field: 'userId', value: userId },
+      filter: { field: 'user_id', value: userId },
     });
 
     const projectIds = subscribeProjects.map(
-      (subscriber) => subscriber.projectId,
+      (subscriber) => subscriber.project_id,
     );
 
     return await this._projectRepository.getMany({
       filter: [
         { field: 'id', value: projectIds },
-        { field: 'ownerId', value: userId, operator: 'or' },
+        { field: 'owner_id', value: userId, operator: 'or' },
       ],
     });
   }
@@ -148,12 +148,12 @@ export class ProjectService {
     if (success) {
       // Удаляем всех подписчиков на этом проекте
       await this._subscriberRepository.remove({
-        filter: { field: 'projectId', value: projectId },
+        filter: { field: 'project_id', value: projectId },
       });
 
       // Удаляем все скрипты из проекта
       await this._scriptRepository.remove({
-        filter: { field: 'projectId', value: projectId },
+        filter: { field: 'project_id', value: projectId },
       });
     }
 

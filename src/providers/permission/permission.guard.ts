@@ -66,7 +66,7 @@ export class PermissionGuard implements CanActivate {
   }
 
   private checkProjectOwner() {
-    return this._project && this._project.ownerId === this._authUser.id;
+    return this._project && this._project.owner_id === this._authUser.id;
   }
 
   private async loadJoinProject() {
@@ -94,8 +94,8 @@ export class PermissionGuard implements CanActivate {
       this._dataSource.manager.getRepository(UserPermissionEntity);
     const query = HQueryBuilder.select(repository, {
       filter: [
-        { field: 'projectId', value: projectId },
-        { field: 'userId', value: this._authUser.id, operator: 'and' },
+        { field: 'project_id', value: projectId },
+        { field: 'user_id', value: this._authUser.id, operator: 'and' },
         { field: 'code', value: permissions, operator: 'and' },
       ],
     });

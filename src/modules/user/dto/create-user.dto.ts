@@ -17,7 +17,7 @@ export class CreateUserDto {
 
   @IsBoolean()
   @IsDefined()
-  licenseAgreement: boolean;
+  license_agreement: boolean;
 
   @IsOptional()
   @IsString()

@@ -115,7 +115,7 @@ function generateName() {
 function generateResource(project: IProject) {
   return ScriptAggregate.create({
     title: generateName(),
-    projectId: project.id,
+    project_id: project.id,
   }).instance;
 }
 

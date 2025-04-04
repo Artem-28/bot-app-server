@@ -5,10 +5,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Exclude } from 'class-transformer';
 import { BaseAggregate } from '@/models/base';
 import { IRespondent } from '@/models/respondent/respondent.interface';
 import { RespondentFingerprintAggregate } from '@/models/respondent-fingerprint';
-import { Exclude } from 'class-transformer';
 
 export class RespondentAggregate
   extends BaseAggregate<IRespondent>
@@ -16,7 +16,7 @@ export class RespondentAggregate
 {
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 
   @IsString()
   @IsOptional()
@@ -50,7 +50,6 @@ export class RespondentAggregate
 
   update(data: Partial<IRespondent>) {
     const { fingerprints, ...params } = data;
-    super.update(params);
     if (fingerprints) {
       this.fingerprints = [];
 
@@ -59,25 +58,27 @@ export class RespondentAggregate
 
         const fingerprint = RespondentFingerprintAggregate.create({
           fingerprint: print.fingerprint,
-          projectId: this.projectId,
-          respondentId: this.id,
+          project_id: this.project_id,
+          respondent_id: this.id,
         });
 
         this.fingerprints.push(fingerprint);
       });
     }
+
+    super.update(params);
   }
 
   get instance(): IRespondent {
     return {
-      projectId: this.projectId,
+      project_id: this.project_id,
       name: this.name,
       surname: this.surname,
       patronymic: this.patronymic,
       email: this.email,
       phone: this.phone,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
       fingerprints: this.fingerprints,
     };
   }

@@ -75,7 +75,7 @@ function generateName() {
 function generateResource(user: UserEntity) {
   return ProjectAggregate.create({
     title: generateName(),
-    ownerId: user.id,
+    owner_id: user.id,
   }).instance;
 }
 

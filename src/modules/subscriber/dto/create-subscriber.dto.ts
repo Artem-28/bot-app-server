@@ -3,7 +3,7 @@ import { IsDefined, IsEmail, IsNumber } from 'class-validator';
 export class CreateSubscriberDto {
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 
   @IsDefined()
   @IsEmail()

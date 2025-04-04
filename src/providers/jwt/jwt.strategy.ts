@@ -22,15 +22,15 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!payload) return false;
 
     const authData = await this.getAuthData(payload.authDataId);
-    if (!authData || !authData.hashToken) return false;
+    if (!authData || !authData.hash_token) return false;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { hashToken, password, ...params } = authData;
+    const { hash_token, password, ...params } = authData;
     request.authData = { ...params };
 
     const matched = await bcrypt.compare(
       JSON.stringify(payload),
-      authData.hashToken,
+      authData.hash_token,
     );
     if (!matched) return false;
 

@@ -5,9 +5,7 @@ import {
   IsEmail,
   IsOptional,
   IsString,
-  validateSync,
 } from 'class-validator';
-import { DomainError } from '@/common/error';
 import { IUser } from '@/models/user';
 import { BaseAggregate } from '@/models/base';
 
@@ -22,7 +20,7 @@ export class UserAggregate extends BaseAggregate<IUser> implements IUser {
 
   @IsBoolean()
   @IsDefined()
-  licenseAgreement = false;
+  license_agreement = false;
 
   @IsOptional()
   @IsString()
@@ -30,25 +28,20 @@ export class UserAggregate extends BaseAggregate<IUser> implements IUser {
 
   @IsOptional()
   @IsDate()
-  emailVerifiedAt = null;
+  email_verified_at = null;
 
   @IsOptional()
   @IsDate()
-  lastActiveAt = null;
+  last_active_at = null;
 
   @IsOptional()
   @IsDate()
-  phoneVerifiedAt = null;
+  phone_verified_at = null;
 
   static create(data: Partial<IUser>) {
-    const _user = new UserAggregate();
-    Object.assign(_user, data);
-    _user.createdAt = data?.id ? _user.createdAt : new Date();
-    const errors = validateSync(_user, { whitelist: true });
-    if (!!errors.length) {
-      throw new DomainError(errors);
-    }
-    return _user;
+    const _entity = new UserAggregate();
+    _entity.update(data)
+    return _entity;
   }
 
   get instance(): IUser {
@@ -56,16 +49,16 @@ export class UserAggregate extends BaseAggregate<IUser> implements IUser {
       name: this.name,
       email: this.email,
       phone: this.phone,
-      emailVerifiedAt: this.emailVerifiedAt,
-      phoneVerifiedAt: this.phoneVerifiedAt,
-      lastActiveAt: this.lastActiveAt,
-      licenseAgreement: this.licenseAgreement,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      email_verified_at: this.email_verified_at,
+      phone_verified_at: this.phone_verified_at,
+      last_active_at: this.last_active_at,
+      license_agreement: this.license_agreement,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
     };
   }
 
   verifyEmail(this: IUser) {
-    this.emailVerifiedAt = new Date();
+    this.email_verified_at = new Date();
   }
 }

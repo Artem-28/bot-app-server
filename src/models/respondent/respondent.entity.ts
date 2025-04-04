@@ -7,7 +7,7 @@ export const RESPONDENT_TABLE = 'respondents';
 @Entity({ name: RESPONDENT_TABLE })
 export class RespondentEntity extends BaseEntity {
   @Column({ name: 'project_id' })
-  public projectId: number;
+  public project_id: number;
 
   @Column({ nullable: true })
   public name: string | null;

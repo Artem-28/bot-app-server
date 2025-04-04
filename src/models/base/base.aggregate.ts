@@ -1,17 +1,17 @@
-import { IBase } from '@/models/base/base.interface';
 import { IsDate, IsNumber, IsOptional, validateSync } from 'class-validator';
+import { IBaseEntity} from '@/models/base/base.interface';
 import { DomainError } from '@/common/error';
 
-export class BaseAggregate<T> implements IBase {
+export class BaseAggregate<T> implements IBaseEntity {
   @IsOptional()
   @IsNumber()
   id?: number;
 
   @IsDate()
-  createdAt = new Date();
+  crated_at = new Date();
 
   @IsDate()
-  updatedAt = new Date();
+  updated_at = new Date();
 
   public update(data: Partial<T>) {
     const entries = Object.entries(data);
@@ -20,8 +20,8 @@ export class BaseAggregate<T> implements IBase {
     entries.forEach(([key, value]) => {
       this[key] = value;
     });
-    this.updatedAt = new Date();
-    this.createdAt = this.id ? this.createdAt : new Date();
+    this.updated_at = new Date();
+    this.crated_at = this.id ? this.crated_at : new Date();
 
     const errors = validateSync(this, { whitelist: true });
     if (!!errors.length) {

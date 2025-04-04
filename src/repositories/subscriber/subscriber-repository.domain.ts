@@ -13,7 +13,7 @@ export abstract class SubscriberRepositoryDomain {
     options?: BuilderOptionsDto<ISubscriber>,
   ): Promise<SubscriberAggregate[]>;
   abstract unsubscribe(
-    data: Pick<ISubscriber, 'projectId' | 'userId'>,
+    data: Pick<ISubscriber, 'project_id' | 'user_id'>,
   ): Promise<boolean>;
   abstract exist(options?: BuilderOptionsDto<ISubscriber>): Promise<boolean>;
 

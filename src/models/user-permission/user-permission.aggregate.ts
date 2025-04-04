@@ -1,11 +1,4 @@
-import {
-  IsBoolean,
-  IsDefined,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  validateSync,
-} from 'class-validator';
+import { IsDefined, IsEnum, IsNumber, validateSync } from 'class-validator';
 import { DomainError } from '@/common/error';
 import { PermissionEnum } from '@/providers/permission';
 import { IUserPermission } from '@/models/user-permission/user-permission.interface';
@@ -13,11 +6,11 @@ import { IUserPermission } from '@/models/user-permission/user-permission.interf
 export class UserPermissionAggregate implements IUserPermission {
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 
   @IsDefined()
   @IsNumber()
-  userId: number;
+  user_id: number;
 
   @IsDefined()
   @IsEnum(PermissionEnum)
@@ -37,8 +30,8 @@ export class UserPermissionAggregate implements IUserPermission {
 
   get instance(): IUserPermission {
     return {
-      userId: this.userId,
-      projectId: this.projectId,
+      user_id: this.user_id,
+      project_id: this.project_id,
       code: this.code,
     };
   }

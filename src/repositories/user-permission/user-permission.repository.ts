@@ -9,8 +9,8 @@ import {
   UserPermissionEntity,
 } from '@/models/user-permission';
 import {
-  BuilderFilterDto,
-  BuilderOptionsDto, DeleteBuilderOptions,
+  BuilderOptionsDto,
+  DeleteBuilderOptions,
   HQueryBuilder,
 } from '@/common/utils/builder';
 
@@ -32,7 +32,7 @@ export class UserPermissionRepository
   }
 
   async remove(
-    options?: DeleteBuilderOptions<IUserPermission>
+    options?: DeleteBuilderOptions<IUserPermission>,
   ): Promise<DeleteResult> {
     const repository = this.getRepository(UserPermissionEntity);
     const query = HQueryBuilder.delete(repository, options);

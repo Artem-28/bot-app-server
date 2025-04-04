@@ -1,4 +1,3 @@
-import { BaseAggregate } from '@/models/base';
 import {
   IsDate,
   IsDefined,
@@ -7,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { BaseAggregate } from '@/models/base';
 import {
   IMessageSession,
   IMessageSessionInstance,
@@ -68,8 +68,8 @@ export class MessageSessionAggregate
       respondent_id: this.respondent_id,
       title: this.title,
       end_at: this.end_at,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
     };
   }
 }

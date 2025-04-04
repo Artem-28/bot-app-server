@@ -1,10 +1,19 @@
-import { Controller, Param, Req, Body, Put, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Req,
+  Body,
+  Put,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
 import { PermissionService } from '@/modules/permission/permission.service';
 import { updatePermissionBodyDto } from '@/modules/permission/dto';
 import { SubscriberService } from '@/modules/subscriber/subscriber.service';
 import { JwtGuard } from '@/providers/jwt';
 import {
-  Permission, PERMISSION_LIST,
+  Permission,
+  PERMISSION_LIST,
   PERMISSION_UPDATE,
   PermissionGuard,
 } from '@/providers/permission';
@@ -22,8 +31,8 @@ export class PermissionController {
   @Permission(PERMISSION_UPDATE)
   async update(@Param() params, @Body() body: updatePermissionBodyDto) {
     const checkDto = {
-      projectId: Number(params.projectId),
-      userId: Number(params.userId),
+      project_id: Number(params.projectId),
+      user_id: Number(params.userId),
     };
     await this.subscriberService.checkExist(checkDto, true);
 
@@ -38,8 +47,8 @@ export class PermissionController {
   @Permission(PERMISSION_LIST)
   async list(@Param() params) {
     const dto = {
-      projectId: Number(params.projectId),
-      userId: Number(params.userId),
+      project_id: Number(params.projectId),
+      user_id: Number(params.userId),
     };
     await this.subscriberService.checkExist(dto, true);
     return await this.permissionService.list(dto);
@@ -48,8 +57,8 @@ export class PermissionController {
   @Get('permissions')
   async authPermissions(@Req() req, @Param() params) {
     const dto = {
-      userId: req.user.id,
-      projectId: Number(params.projectId),
+      user_id: req.user.id,
+      project_id: Number(params.projectId),
     };
     return await this.permissionService.list(dto);
   }

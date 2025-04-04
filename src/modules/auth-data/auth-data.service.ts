@@ -52,7 +52,7 @@ export class AuthDataService {
 
   public async removeToken(authDataId: number, throwException = false) {
     const success = await this._authDataRepository.update(authDataId, {
-      hashToken: null,
+      hash_token: null,
     });
     if (!success && throwException) {
       throw new CommonError({ messages: errors.logout.base });
@@ -72,7 +72,7 @@ export class AuthDataService {
     const password = await bcrypt.hash(dto.password, 10);
     const success = await this._authDataRepository.update(authData.id, {
       password,
-      hashToken: null,
+      hash_token: null,
     });
 
     if (!success && throwException) {
@@ -91,7 +91,7 @@ export class AuthDataService {
       throw new CommonError({ messages: errors.user.not_exist });
     }
     if (!exist) return '';
-    const expiresIn = this.expiresTokenPassword(code.liveAt);
+    const expiresIn = this.expiresTokenPassword(code.live_at);
     const token = this._jwtService.sign(
       {
         login: code.destination,
@@ -123,7 +123,7 @@ export class AuthDataService {
     const decodeToken = this._jwtService.decode(accessToken);
     const hashToken = await bcrypt.hash(JSON.stringify(decodeToken), 10);
     const success = await this._authDataRepository.update(authData.id, {
-      hashToken,
+      hash_token: hashToken,
     });
     if (!success && throwException) {
       throw new CommonError({ messages: errors.sign_in.base });

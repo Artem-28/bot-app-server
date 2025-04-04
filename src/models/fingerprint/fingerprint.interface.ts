@@ -1,9 +1,9 @@
 export interface IFingerprint {
   fingerprint: string;
 
-  groupKey: string;
+  group_key: string;
 
-  lastActiveAt: Date;
+  last_active_at: Date;
 
-  createdAt: Date;
+  created_at: Date;
 }

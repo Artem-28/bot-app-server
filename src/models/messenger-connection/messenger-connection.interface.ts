@@ -1,8 +1,8 @@
-import { IBase } from '@/models/base';
+import { IBaseEntity} from '@/models/base';
 import { IUser } from '@/models/user';
 import { IMessageSession } from '@/models/message-session';
 
-export interface IMessengerConnectionInstance extends IBase {
+export interface IMessengerConnectionInstance extends IBaseEntity {
   client_id: string;
   /** Индификатор проекта */
   project_id: number;

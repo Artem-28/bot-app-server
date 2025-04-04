@@ -48,7 +48,7 @@ export class SubscriberController {
     // Добавление подписшика в проект
     return await this.subscriberService.create({
       ...dto,
-      projectId,
+      project_id: projectId,
     });
   }
 
@@ -63,13 +63,13 @@ export class SubscriberController {
   @Post('unsubscribe')
   @UseInterceptors(TransactionInterceptor)
   async unsubscribe(@Req() req, @Param('projectId') projectId) {
-    projectId = Number(projectId);
-    const userId = req.user.id;
-    await this.subscriberService.unsubscribe({ projectId, userId });
+    const project_id = Number(projectId);
+    const user_id = req.user.id;
+    await this.subscriberService.unsubscribe({ project_id, user_id });
 
     const result = await this.permissionService.update({
-      projectId,
-      userId,
+      project_id,
+      user_id,
       permissions: [],
     });
 
@@ -85,15 +85,15 @@ export class SubscriberController {
   @Permission(SUBSCRIBER_REMOVE)
   @UseInterceptors(TransactionInterceptor)
   async removeSubscriber(@Param() params) {
-    const projectId = Number(params.projectId);
-    const subscriberId = Number(params.subscriberId);
+    const project_id = Number(params.projectId);
+    const subscriber_id = Number(params.subscriberId);
     const removedSubscriber = await this.subscriberService.remove({
-      projectId,
-      subscriberId,
+      project_id,
+      subscriber_id,
     });
     const result = await this.permissionService.update({
-      projectId,
-      userId: removedSubscriber.userId,
+      project_id,
+      user_id: removedSubscriber.user_id,
       permissions: [],
     });
 

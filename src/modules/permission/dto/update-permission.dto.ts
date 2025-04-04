@@ -4,11 +4,11 @@ import { IsArray, IsDefined, IsNumber } from 'class-validator';
 export class UpdatePermissionDto {
   @IsDefined()
   @IsNumber()
-  projectId: number;
+  project_id: number;
 
   @IsDefined()
   @IsNumber()
-  userId: number;
+  user_id: number;
 
   @IsDefined()
   @IsArray()
