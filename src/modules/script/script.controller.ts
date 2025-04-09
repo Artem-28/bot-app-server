@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   UseGuards,
@@ -19,9 +18,14 @@ import {
   SCRIPT_UPDATE,
   SCRIPT_VIEW,
 } from '@/providers/permission';
-import { IProjectParam, IScriptParam } from '@/common/types';
+import {
+  ParamProject,
+  ParamScript,
+  ParamProjectTransformer,
+  ParamScriptTransformer,
+} from '@/common/param';
 
-@Controller('api/v1/projects/:projectId/scripts')
+@Controller('api/v1/projects/:project_id/scripts')
 @UseGuards(JwtGuard)
 export class ScriptController {
   constructor(readonly scriptService: ScriptService) {}
@@ -30,7 +34,7 @@ export class ScriptController {
   @UseGuards(PermissionGuard)
   @Permission(SCRIPT_CREATE)
   public async create(
-    @Param() param: IProjectParam,
+    @ParamProjectTransformer() param: ParamProject,
     @Body() body: CreateScriptDto,
   ) {
     return await this.scriptService.create(param, body);
@@ -39,31 +43,31 @@ export class ScriptController {
   @Get()
   @UseGuards(PermissionGuard)
   @Permission(SCRIPT_VIEW)
-  public async projectScripts(@Param() param: IProjectParam) {
+  public async projectScripts(@ParamProjectTransformer() param: ParamProject) {
     return await this.scriptService.projectScripts(param);
   }
 
-  @Delete(':scriptId')
+  @Delete(':script_id')
   @UseGuards(PermissionGuard)
   @Permission(SCRIPT_REMOVE)
-  public async remove(@Param() param: IScriptParam) {
+  public async remove(@ParamScriptTransformer() param: ParamScript) {
     return await this.scriptService.remove(param);
   }
 
-  @Patch(':scriptId')
+  @Patch(':script_id')
   @UseGuards(PermissionGuard)
   @Permission(SCRIPT_UPDATE)
   public async update(
-    @Param() param: IScriptParam,
+    @ParamScriptTransformer() param: ParamScript,
     @Body() body: UpdateScriptDto,
   ) {
     return await this.scriptService.update(param, body);
   }
 
-  @Get(':scriptId')
+  @Get(':script_id')
   @UseGuards(PermissionGuard)
   @Permission(SCRIPT_VIEW)
-  public async info(@Param() param: IScriptParam) {
+  public async info(@ParamScriptTransformer() param: ParamScript) {
     return await this.scriptService.info(param);
   }
 }

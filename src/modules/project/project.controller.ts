@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Patch,
   Delete,
@@ -27,6 +26,7 @@ import {
 } from '@/modules/project/dto';
 import { TransactionInterceptor } from '@/common/interceptors';
 import { PermissionService } from '@/modules/permission/permission.service';
+import { ParamProject, ParamProjectTransformer } from '@/common/param';
 
 @Controller('api/v1/projects')
 @UseGuards(JwtGuard)
@@ -47,52 +47,51 @@ export class ProjectController {
     return await this.projectService.viewProjects(userId);
   }
 
-  @Get(':projectId')
+  @Get(':project_id')
   @UseGuards(PermissionGuard)
   @Permission(PROJECT_INFO)
-  public async info(@Param('projectId') projectId) {
-    return await this.projectService.info(projectId, true);
+  public async info(@ParamProjectTransformer() param: ParamProject) {
+    return await this.projectService.info(param.project_id, true);
   }
 
-  @Patch(':projectId')
+  @Patch(':project_id')
   @UseGuards(PermissionGuard)
   @Permission(PROJECT_UPDATE)
   public async update(
-    @Param('projectId') projectId,
+    @ParamProjectTransformer() param: ParamProject,
     @Body() body: UpdateProjectBodyDto,
   ) {
     return await this.projectService.update({
-      project_id: Number(projectId),
+      ...param,
       ...body,
     });
   }
 
-  @Delete(':projectId')
+  @Delete(':project_id')
   @UseGuards(PermissionGuard)
   @Permission(PROJECT_REMOVE)
   @UseInterceptors(TransactionInterceptor)
-  public async remove(@Param('projectId') projectId) {
-    const success = await this.projectService.remove(projectId, true);
-    await this.permissionService.removeProjectPermissions(projectId);
+  public async remove(@ParamProjectTransformer() param: ParamProject) {
+    const success = await this.projectService.remove(param.project_id, true);
+    await this.permissionService.removeProjectPermissions(param.project_id);
     return success;
   }
 
-  @Patch(':projectId/change-owner')
+  @Patch(':project_id/change-owner')
   @UseGuards(PermissionGuard)
   @Permission(PROJECT_CHANGE_OWNER)
   @UseInterceptors(TransactionInterceptor)
   public async changeOwner(
-    @Param('projectId') projectId,
+    @ParamProjectTransformer() param: ParamProject,
     @Body() body: ChangeOwnerBodyDto,
   ) {
     const project = await this.projectService.changeOwner({
-      project_id: Number(projectId),
+      ...param,
       ...body,
     });
-    await this.permissionService.update({
-      project_id: project.id,
+    await this.permissionService.remove({
+      ...param,
       user_id: project.owner_id,
-      permissions: [],
     });
 
     return project;

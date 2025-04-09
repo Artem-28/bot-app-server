@@ -8,15 +8,15 @@ import {
   PermissionType,
 } from '@/providers/permission/permission.type';
 import { ProjectAggregate, ProjectEntity } from '@/models/project';
-import { ParamsDto } from '@/common/dto';
 import { HQueryBuilder } from '@/common/utils/builder';
 import { UserPermissionEntity } from '@/models/user-permission';
 import { IUser } from '@/models/user';
+import { ParamProject } from '@/common/param';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
   private _access: AccessController;
-  private _params: ParamsDto;
+  private _params: ParamProject;
   private _project: ProjectAggregate;
   private _permissions: AccessPermission[] = [];
   private _authUser: IUser;
@@ -30,22 +30,19 @@ export class PermissionGuard implements CanActivate {
       PERMISSION_KEY,
       ctx.getHandler(),
     );
-    const params = this.getParams(ctx);
-    return await this.check(accessController, params);
+    this.setParams(ctx);
+    return await this.check(accessController);
   }
 
-  private getParams(ctx: ExecutionContext): ParamsDto {
+  private setParams(ctx: ExecutionContext) {
     const request = ctx.switchToHttp().getRequest();
     this._authUser = request.user;
-    return Object.entries(request.params).reduce((acc, [key, value]) => {
-      acc[key] = Number(value);
-      return acc;
-    }, {}) as ParamsDto;
+    this._params = new ParamProject();
+    this._params.project_id = request.params.project_id;
   }
 
-  private async check(accessController: AccessController, params: ParamsDto) {
+  private async check(accessController: AccessController) {
     this._access = accessController;
-    this._params = params;
 
     await this.loadJoinProject();
     if (!this._project) return false;
@@ -70,14 +67,14 @@ export class PermissionGuard implements CanActivate {
   }
 
   private async loadJoinProject() {
-    const { projectId } = this._params;
-    if (!projectId) return;
+    const { project_id } = this._params;
+    if (!project_id) return;
 
     const repository =
       await this._dataSource.manager.getRepository(ProjectEntity);
 
     const query = HQueryBuilder.select(repository, {
-      filter: { field: 'id', value: projectId },
+      filter: { field: 'id', value: project_id },
     });
 
     const project = await query.builder.getOne();
@@ -87,14 +84,14 @@ export class PermissionGuard implements CanActivate {
   }
 
   private async loadPermissions() {
-    const { projectId } = this._params;
+    const { project_id } = this._params;
     const permissions = this._access.permissions;
-    if (!projectId || !this._authUser || !permissions.length) return;
+    if (!project_id || !this._authUser || !permissions.length) return;
     const repository =
       this._dataSource.manager.getRepository(UserPermissionEntity);
     const query = HQueryBuilder.select(repository, {
       filter: [
-        { field: 'project_id', value: projectId },
+        { field: 'project_id', value: permissions },
         { field: 'user_id', value: this._authUser.id, operator: 'and' },
         { field: 'code', value: permissions, operator: 'and' },
       ],

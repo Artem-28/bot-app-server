@@ -94,9 +94,11 @@ export class ProjectService {
     }
 
     // Удаляем пользователя из подписчиков на этом проекте если он им был
-    await this._subscriberRepository.unsubscribe({
-      project_id: project.id,
-      user_id: user.id,
+    await this._subscriberRepository.remove({
+      filter: [
+        { field: 'project_id', value: project.id },
+        { field: 'user_id', value: user.id },
+      ],
     });
 
     return project;

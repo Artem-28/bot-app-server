@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { RespondentRepository } from '@/repositories/respondent';
-import { IProjectParam, IRespondentParam } from '@/common/types';
 import {
   CreateRespondentDto,
   UpdateRespondentDto,
@@ -10,6 +9,7 @@ import { CommonError, errors } from '@/common/error';
 import { IRespondentFingerprint } from '@/models/respondent-fingerprint';
 import { RespondentFingerprintRepository } from '@/repositories/respondent-fingerprint';
 import { hToArray } from '@/common/utils/formatter';
+import { ParamProject, ParamRespondent } from '@/common/param';
 
 @Injectable()
 export class RespondentService {
@@ -32,17 +32,17 @@ export class RespondentService {
     return this._respondentRepository.create(respondent);
   }
 
-  public projectRespondents(param: IProjectParam) {
+  public projectRespondents(param: ParamProject) {
     return this._respondentRepository.getMany({
-      filter: { field: 'project_id', value: param.projectId },
+      filter: { field: 'project_id', value: param.project_id },
     });
   }
 
-  public async update(param: IRespondentParam, dto: UpdateRespondentDto) {
+  public async update(param: ParamRespondent, dto: UpdateRespondentDto) {
     const respondent = await this._respondentRepository.getOne({
       filter: [
-        { field: 'id', value: param.respondentId },
-        { field: 'project_id', value: param.projectId, operator: 'and' },
+        { field: 'id', value: param.respondent_id },
+        { field: 'project_id', value: param.project_id, operator: 'and' },
       ],
     });
 

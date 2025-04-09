@@ -1,14 +1,6 @@
-import {
-  Controller,
-  Param,
-  Req,
-  Body,
-  Put,
-  Get,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Req, Body, Put, Get, UseGuards } from '@nestjs/common';
 import { PermissionService } from '@/modules/permission/permission.service';
-import { updatePermissionBodyDto } from '@/modules/permission/dto';
+import { UpdatePermissionDto } from '@/modules/permission/dto';
 import { SubscriberService } from '@/modules/subscriber/subscriber.service';
 import { JwtGuard } from '@/providers/jwt';
 import {
@@ -17,8 +9,14 @@ import {
   PERMISSION_UPDATE,
   PermissionGuard,
 } from '@/providers/permission';
+import {
+  ParamProject,
+  ParamSubscriber,
+  ParamProjectTransformer,
+  ParamSubscriberTransformer,
+} from '@/common/param';
 
-@Controller('api/v1/projects/:projectId')
+@Controller('api/v1/projects/:project_id')
 @UseGuards(JwtGuard)
 export class PermissionController {
   constructor(
@@ -26,40 +24,33 @@ export class PermissionController {
     readonly subscriberService: SubscriberService,
   ) {}
 
-  @Put('users/:userId/permissions')
+  @Put('users/:user_id/permissions')
   @UseGuards(PermissionGuard)
   @Permission(PERMISSION_UPDATE)
-  async update(@Param() params, @Body() body: updatePermissionBodyDto) {
-    const checkDto = {
-      project_id: Number(params.projectId),
-      user_id: Number(params.userId),
-    };
-    await this.subscriberService.checkExist(checkDto, true);
-
-    return await this.permissionService.update({
-      ...checkDto,
-      permissions: body.permissions,
-    });
+  async update(
+    @ParamSubscriberTransformer() param: ParamSubscriber,
+    @Body() body: UpdatePermissionDto,
+  ) {
+    await this.subscriberService.checkExist(param, true);
+    return await this.permissionService.update(param, body);
   }
 
-  @Get('users/:userId/permissions')
+  @Get('users/:user_id/permissions')
   @UseGuards(PermissionGuard)
   @Permission(PERMISSION_LIST)
-  async list(@Param() params) {
-    const dto = {
-      project_id: Number(params.projectId),
-      user_id: Number(params.userId),
-    };
-    await this.subscriberService.checkExist(dto, true);
-    return await this.permissionService.list(dto);
+  async list(@ParamSubscriberTransformer() param: ParamSubscriber) {
+    await this.subscriberService.checkExist(param, true);
+    return await this.permissionService.list(param);
   }
 
   @Get('permissions')
-  async authPermissions(@Req() req, @Param() params) {
-    const dto = {
+  async authPermissions(
+    @Req() req,
+    @ParamProjectTransformer() param: ParamProject,
+  ) {
+    return await this.permissionService.list({
+      ...param,
       user_id: req.user.id,
-      project_id: Number(params.projectId),
-    };
-    return await this.permissionService.list(dto);
+    });
   }
 }

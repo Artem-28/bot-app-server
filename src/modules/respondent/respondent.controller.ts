@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { RespondentService } from '@/modules/respondent/respondent.service';
 import {
   Permission,
@@ -17,33 +7,29 @@ import {
   RESPONDENT_VIEW,
   SCRIPT_UPDATE,
 } from '@/providers/permission';
-import { IProjectParam, IRespondentParam } from '@/common/types';
 import { UpdateRespondentDto } from '@/modules/respondent/dto';
 import { JwtGuard } from '@/providers/jwt';
 import {
-  FingerprintInterceptor,
-  TransactionInterceptor,
-} from '@/common/interceptors';
-import { FingerprintService } from '@/modules/fingerprint';
+  ParamProject,
+  ParamProjectTransformer,
+  ParamRespondent,
+  ParamRespondentTransformer,
+} from '@/common/param';
 
-@Controller('api/v1/projects/:projectId/respondents')
+@Controller('api/v1/projects/:project_id/respondents')
 export class RespondentController {
-  constructor(
-    readonly respondentService: RespondentService,
-    readonly fingerprintService: FingerprintService,
-  ) {}
+  constructor(readonly respondentService: RespondentService) {}
 
   @Post()
   @UseGuards(JwtGuard)
   @UseGuards(PermissionGuard)
   @Permission(RESPONDENT_CREATE)
   public async create(
-    @Param() param: IProjectParam,
+    @ParamProjectTransformer() param: ParamProject,
     @Body() body: UpdateRespondentDto,
   ) {
-    const project_id = Number(param.projectId);
     return await this.respondentService.create({
-      project_id,
+      ...param,
       ...body,
     });
   }
@@ -52,31 +38,18 @@ export class RespondentController {
   @UseGuards(JwtGuard)
   @UseGuards(PermissionGuard)
   @Permission(RESPONDENT_VIEW)
-  public async projectScripts(@Param() param: IProjectParam) {
+  public async projectScripts(@ParamProjectTransformer() param: ParamProject) {
     return await this.respondentService.projectRespondents(param);
   }
 
-  @Patch(':respondentId')
+  @Patch(':respondent_id')
   @UseGuards(JwtGuard)
   @UseGuards(PermissionGuard)
   @Permission(SCRIPT_UPDATE)
   public async update(
-    @Param() param: IRespondentParam,
+    @ParamRespondentTransformer() param: ParamRespondent,
     @Body() body: UpdateRespondentDto,
   ) {
     return await this.respondentService.update(param, body);
-  }
-
-  @Get('identification')
-  @UseInterceptors(FingerprintInterceptor)
-  @UseInterceptors(TransactionInterceptor)
-  public async identification(@Req() req, @Param() param: IProjectParam) {
-    const projectId = Number(param.projectId);
-    const data = await this.fingerprintService.getFingerprint(
-      req.fingerprint,
-      true,
-    );
-    const fingerprint = data.map((item) => item.fingerprint);
-    return this.respondentService.respondentIdentity(projectId, fingerprint);
   }
 }

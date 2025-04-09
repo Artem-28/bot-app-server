@@ -17,15 +17,3 @@ export interface IToken {
   accessToken: string | null;
   tokenType: 'Bearer' | null;
 }
-
-export interface IProjectParam {
-  projectId: string;
-}
-
-export interface IScriptParam extends IProjectParam {
-  scriptId: string;
-}
-
-export interface IRespondentParam extends IProjectParam {
-  respondentId: string;
-}

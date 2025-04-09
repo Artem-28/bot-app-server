@@ -4,7 +4,6 @@ import {
   Post,
   UseGuards,
   Req,
-  Param,
   Delete,
   UseInterceptors,
   Get,
@@ -22,8 +21,14 @@ import { CommonError, errors } from '@/common/error';
 import { SubscribeDto } from '@/modules/subscriber/dto';
 import { PermissionService } from '@/modules/permission/permission.service';
 import { TransactionInterceptor } from '@/common/interceptors';
+import {
+  ParamProject,
+  ParamSubscriber,
+  ParamProjectTransformer,
+  ParamSubscriberTransformer,
+} from '@/common/param';
 
-@Controller('api/v1/projects/:projectId/subscribers')
+@Controller('api/v1/projects/:project_id/subscribers')
 @UseGuards(JwtGuard)
 export class SubscriberController {
   constructor(
@@ -36,7 +41,7 @@ export class SubscriberController {
   @Permission(SUBSCRIBER_CREATE)
   async subscribe(
     @Req() req,
-    @Param('projectId') projectId,
+    @ParamProjectTransformer() param: ParamProject,
     @Body() dto: SubscribeDto,
   ) {
     if (req.user.email === dto.email) {
@@ -44,34 +49,35 @@ export class SubscriberController {
         messages: errors.subscriber.owner_project,
       });
     }
-    projectId = Number(projectId);
     // Добавление подписшика в проект
     return await this.subscriberService.create({
       ...dto,
-      project_id: projectId,
+      ...param,
     });
   }
 
   @Get()
   @UseGuards(PermissionGuard)
   @Permission(SUBSCRIBER_VIEW)
-  async subscribers(@Param('projectId') projectId) {
-    projectId = Number(projectId);
-    return await this.subscriberService.projectSubscribers(projectId);
+  async subscribers(@ParamProjectTransformer() param: ParamProject) {
+    return await this.subscriberService.projectSubscribers(param.project_id);
   }
 
   @Post('unsubscribe')
   @UseInterceptors(TransactionInterceptor)
-  async unsubscribe(@Req() req, @Param('projectId') projectId) {
-    const project_id = Number(projectId);
+  async unsubscribe(
+    @Req() req,
+    @ParamProjectTransformer() param: ParamProject,
+  ) {
     const user_id = req.user.id;
-    await this.subscriberService.unsubscribe({ project_id, user_id });
+    await this.subscriberService.remove({ ...param, user_id });
 
-    const result = await this.permissionService.update({
-      project_id,
-      user_id,
-      permissions: [],
-    });
+    const result = await this.permissionService.update(
+      { ...param, user_id },
+      {
+        permissions: [],
+      },
+    );
 
     const success = result.permissions.length === 0;
     if (!success) {
@@ -80,20 +86,13 @@ export class SubscriberController {
     return success;
   }
 
-  @Delete(':subscriberId')
+  @Delete(':user_id')
   @UseGuards(PermissionGuard)
   @Permission(SUBSCRIBER_REMOVE)
   @UseInterceptors(TransactionInterceptor)
-  async removeSubscriber(@Param() params) {
-    const project_id = Number(params.projectId);
-    const subscriber_id = Number(params.subscriberId);
-    const removedSubscriber = await this.subscriberService.remove({
-      project_id,
-      subscriber_id,
-    });
-    const result = await this.permissionService.update({
-      project_id,
-      user_id: removedSubscriber.user_id,
+  async removeSubscriber(@ParamSubscriberTransformer() param: ParamSubscriber) {
+    await this.subscriberService.remove(param);
+    const result = await this.permissionService.update(param, {
       permissions: [],
     });
 

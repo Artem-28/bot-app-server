@@ -1,14 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { SubscriberRepository } from '@/repositories/subscriber';
 import { UserRepository } from '@/repositories/user';
-import {
-  CreateSubscriberDto,
-  ExistSubscriberDto,
-  RemoveSubscriberDto,
-  UnsubscribeDto,
-} from '@/modules/subscriber/dto';
+import { CreateSubscriberDto } from '@/modules/subscriber/dto';
 import { CommonError, errors } from '@/common/error';
 import { SubscriberAggregate, SubscriberUser } from '@/models/subscriber';
+import { ParamSubscriber } from '@/common/param';
 
 @Injectable()
 export class SubscriberService {
@@ -38,11 +34,11 @@ export class SubscriberService {
     return SubscriberUser.create(subscriber, user);
   }
 
-  public async checkExist(dto: ExistSubscriberDto, throwException = false) {
+  public async checkExist(param: ParamSubscriber, throwException = false) {
     const exist = await this._subscriberRepository.exist({
       filter: [
-        { field: 'project_id', value: dto.project_id },
-        { field: 'user_id', value: dto.user_id, operator: 'and' },
+        { field: 'project_id', value: param.project_id },
+        { field: 'user_id', value: param.user_id, operator: 'and' },
       ],
     });
 
@@ -53,11 +49,11 @@ export class SubscriberService {
   }
 
   // Удаление пользователя из подписчиков
-  public async remove(dto: RemoveSubscriberDto) {
+  public async remove(param: ParamSubscriber) {
     const subscriber = await this._subscriberRepository.getOne({
       filter: [
-        { field: 'project_id', value: dto.project_id },
-        { field: 'id', value: dto.subscriber_id, operator: 'and' },
+        { field: 'project_id', value: param.project_id },
+        { field: 'user_id', value: param.user_id, operator: 'and' },
       ],
     });
 
@@ -66,7 +62,10 @@ export class SubscriberService {
     }
 
     const success = await this._subscriberRepository.remove({
-      filter: { field: 'id', value: dto.subscriber_id },
+      filter: [
+        { field: 'project_id', value: param.project_id },
+        { field: 'user_id', value: param.user_id, operator: 'and' },
+      ],
     });
 
     if (!success) {
@@ -74,30 +73,6 @@ export class SubscriberService {
     }
 
     return subscriber;
-  }
-
-  // Подписчик сам отписывается от проекта
-  public async unsubscribe(dto: UnsubscribeDto) {
-    const subscriber = await this._subscriberRepository.getOne({
-      filter: [
-        { field: 'project_id', value: dto.project_id },
-        { field: 'user_id', value: dto.user_id, operator: 'and' },
-      ],
-    });
-
-    if (!subscriber) {
-      throw new CommonError({ messages: errors.subscriber.not_exist });
-    }
-
-    const success = await this._subscriberRepository.remove({
-      filter: { field: 'id', value: subscriber.id },
-    });
-
-    if (!success) {
-      throw new CommonError({ messages: errors.subscriber.remove });
-    }
-
-    return success;
   }
 
   public async projectSubscribers(projectId: number) {

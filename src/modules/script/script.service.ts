@@ -2,26 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { ScriptRepository } from '@/repositories/script';
 import { CreateScriptDto, UpdateScriptDto } from '@/modules/script/dto';
 import { ScriptAggregate } from '@/models/script';
-import { IProjectParam, IScriptParam } from '@/common/types';
 import { CommonError, errors } from '@/common/error';
+import { ParamProject, ParamScript } from '@/common/param';
 
 @Injectable()
 export class ScriptService {
   constructor(private readonly _scriptRepository: ScriptRepository) {}
 
-  public create(param: IProjectParam, dto: CreateScriptDto) {
+  public create(param: ParamProject, dto: CreateScriptDto) {
     const script = ScriptAggregate.create({
-      project_id: Number(param.projectId),
+      ...param,
       ...dto,
     });
     return this._scriptRepository.create(script.instance);
   }
 
-  public async update(param: IScriptParam, dto: UpdateScriptDto) {
+  public async update(param: ParamScript, dto: UpdateScriptDto) {
     const script = await this._scriptRepository.getOne({
       filter: [
-        { field: 'id', value: param.scriptId },
-        { field: 'project_id', value: param.projectId, operator: 'and' },
+        { field: 'id', value: param.script_id },
+        { field: 'project_id', value: param.project_id, operator: 'and' },
       ],
     });
 
@@ -47,11 +47,11 @@ export class ScriptService {
     return script;
   }
 
-  public async info(param: IScriptParam) {
+  public async info(param: ParamScript) {
     const script = await this._scriptRepository.getOne({
       filter: [
-        { field: 'id', value: param.scriptId },
-        { field: 'project_id', value: param.projectId, operator: 'and' },
+        { field: 'id', value: param.script_id },
+        { field: 'project_id', value: param.project_id, operator: 'and' },
       ],
     });
 
@@ -62,17 +62,17 @@ export class ScriptService {
     return script;
   }
 
-  public projectScripts(param: IProjectParam) {
+  public projectScripts(param: ParamProject) {
     return this._scriptRepository.getMany({
-      filter: { field: 'project_id', value: param.projectId },
+      filter: { field: 'project_id', value: param.project_id },
     });
   }
 
-  public async remove(param: IScriptParam) {
+  public async remove(param: ParamScript) {
     const result = await this._scriptRepository.remove({
       filter: [
-        { field: 'id', value: param.scriptId },
-        { field: 'project_id', value: param.projectId, operator: 'and' },
+        { field: 'id', value: param.script_id },
+        { field: 'project_id', value: param.project_id, operator: 'and' },
       ],
     });
     const success = result.affected > 0;
