@@ -28,7 +28,7 @@ export class ProjectAggregate
 
   public setOwner(user: IUser) {
     this.owner_id = user.id;
-    Object.assign(this.owner, user);
+    this.owner = user;
   }
 
   get instance(): IProject {
