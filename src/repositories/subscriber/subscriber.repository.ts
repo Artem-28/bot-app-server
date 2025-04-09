@@ -58,20 +58,6 @@ export class SubscriberRepository
     return !!result.affected;
   }
 
-  async unsubscribe(
-    data: Pick<ISubscriber, 'project_id' | 'user_id'>,
-  ): Promise<boolean> {
-    const repository = this.getRepository(SubscriberEntity);
-    const query = HQueryBuilder.delete(repository, {
-      filter: [
-        { field: 'user_id', value: data.user_id },
-        { field: 'project_id', value: data.project_id, operator: 'and' },
-      ],
-    });
-    const result = await query.builder.execute();
-    return !!result.affected;
-  }
-
   async exist(options?: BuilderOptionsDto<ISubscriber>): Promise<boolean> {
     const repository = this.getRepository(SubscriberEntity);
     const query = HQueryBuilder.select(repository, options);

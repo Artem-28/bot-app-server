@@ -1,14 +1,21 @@
-import { IBaseEntity } from '@/models/base';
 import { IUser } from '@/models/user';
+import { IBaseEntity } from '@/models/base';
 
-export interface ISubscriber extends IBaseEntity {
+export interface ISubscriber {
   /** Идентификатор пользователя */
   user_id: number;
 
   /** Идентификатор проекта */
   project_id: number;
+
+  crated_at: Date;
 }
 
 export interface ISubscriberUser
-  extends ISubscriber,
-    Pick<IUser, 'name' | 'last_active_at' | 'email'> {}
+  extends IBaseEntity,
+    Pick<IUser, 'name' | 'last_active_at' | 'email' | 'crated_at'> {
+  /** Идентификатор проекта */
+  project_id: number;
+
+  subscribe_at: Date;
+}

@@ -12,9 +12,6 @@ export abstract class SubscriberRepositoryDomain {
   abstract getMany(
     options?: BuilderOptionsDto<ISubscriber>,
   ): Promise<SubscriberAggregate[]>;
-  abstract unsubscribe(
-    data: Pick<ISubscriber, 'project_id' | 'user_id'>,
-  ): Promise<boolean>;
   abstract exist(options?: BuilderOptionsDto<ISubscriber>): Promise<boolean>;
 
   abstract remove(

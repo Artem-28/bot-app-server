@@ -95,4 +95,27 @@ export class SubscriberService {
       SubscriberUser.create(mapSubscribers[user.id], user),
     );
   }
+
+  public async subscriberInfo(param: ParamSubscriber) {
+    const subscriber = await this._subscriberRepository.getOne({
+      filter: [
+        { field: 'project_id', value: param.project_id },
+        { field: 'user_id', value: param.user_id, operator: 'and' },
+      ],
+    });
+
+    if (!subscriber) {
+      throw new CommonError({ messages: errors.subscriber.not_exist });
+    }
+
+    const user = await this._userRepository.getOne({
+      filter: { field: 'id', value: subscriber.user_id },
+    });
+
+    if (!user) {
+      throw new CommonError({ messages: errors.subscriber.not_exist });
+    }
+
+    return SubscriberUser.create(subscriber, user);
+  }
 }

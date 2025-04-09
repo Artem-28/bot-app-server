@@ -63,6 +63,13 @@ export class SubscriberController {
     return await this.subscriberService.projectSubscribers(param.project_id);
   }
 
+  @Get(':user_id')
+  @UseGuards(PermissionGuard)
+  @Permission(SUBSCRIBER_VIEW)
+  async info(@ParamSubscriberTransformer() param: ParamSubscriber) {
+    return await this.subscriberService.subscriberInfo(param);
+  }
+
   @Post('unsubscribe')
   @UseInterceptors(TransactionInterceptor)
   async unsubscribe(

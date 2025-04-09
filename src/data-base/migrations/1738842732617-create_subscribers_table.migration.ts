@@ -7,14 +7,20 @@ const table = hCreateTable(
   [
     {
       name: 'user_id',
+      isPrimary: true,
       type: 'int',
     },
     {
       name: 'project_id',
+      isPrimary: true,
       type: 'int',
     },
   ],
-  { uniques: [['user_id', 'project_id']] },
+  {
+    uniques: [['user_id', 'project_id']],
+    columnId: false,
+    columnUpdatedAt: false,
+  },
 );
 
 export class CreateSubscribersTable1738842732617 implements MigrationInterface {

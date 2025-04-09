@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  validateSync,
 } from 'class-validator';
 import { BaseAggregate } from '@/models/base';
 import {
@@ -12,11 +13,9 @@ import {
   ISubscriberUser,
 } from '@/models/subscriber/subscriber.interface';
 import { IUser } from '@/models/user';
+import { DomainError } from '@/common/error';
 
-export class SubscriberAggregate
-  extends BaseAggregate<ISubscriber>
-  implements ISubscriber
-{
+export class SubscriberAggregate implements ISubscriber {
   @IsDefined()
   @IsNumber()
   user_id: number;
@@ -25,19 +24,34 @@ export class SubscriberAggregate
   @IsNumber()
   project_id: number;
 
+  @IsDate()
+  crated_at = new Date();
+
   static create(data: Partial<ISubscriber>) {
     const _entity = new SubscriberAggregate();
     _entity.update(data);
     return _entity;
   }
 
+  public update(data: Partial<ISubscriber>) {
+    const entries = Object.entries(data);
+
+    entries.forEach(([key, value]) => {
+      this[key] = value;
+    });
+    this.crated_at = this.crated_at || new Date();
+
+    const errors = validateSync(this, { whitelist: true });
+    if (!!errors.length) {
+      throw new DomainError(errors);
+    }
+  }
+
   get instance(): ISubscriber {
     return {
-      id: this.id,
       user_id: this.user_id,
       project_id: this.project_id,
       crated_at: this.crated_at,
-      updated_at: this.updated_at,
     };
   }
 }
@@ -51,10 +65,6 @@ export class SubscriberUser
   project_id: number;
 
   @IsDefined()
-  @IsNumber()
-  user_id: number;
-
-  @IsDefined()
   @IsEmail()
   email: string;
 
@@ -66,10 +76,22 @@ export class SubscriberUser
   @IsDefined()
   name: string;
 
+  @IsDate()
+  subscribe_at: Date;
+
   static create(subscriber: ISubscriber, user: IUser) {
     const _entity = new SubscriberUser();
-    const { name, email, last_active_at } = user;
-    _entity.update({ ...subscriber, name, email, last_active_at });
+    const { id, name, email, last_active_at, crated_at } = user;
+    const { project_id, crated_at: subscribe_at } = subscriber;
+    _entity.update({
+      project_id,
+      name,
+      email,
+      last_active_at,
+      id,
+      subscribe_at,
+      crated_at,
+    });
 
     return _entity;
   }
