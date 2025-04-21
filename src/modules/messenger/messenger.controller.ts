@@ -26,7 +26,6 @@ export class MessengerController {
       true,
     );
     const fingerprint = data.map((item) => item.fingerprint);
-
     return this.messengerService.getConnectionToken({
       ...param,
       fingerprint,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   AuthMessengerDto,
+  CreateMessageDto,
   OperatorConnectionDto,
   RespondentConnectionDto,
   SessionDto,
@@ -14,6 +15,12 @@ import { JwtService } from '@nestjs/jwt';
 import { MessengerConnectionRepository } from '@/repositories/messenger-connection';
 import { MessengerConnectionAggregate } from '@/models/messenger-connection';
 import { UserRepository } from '@/repositories/user';
+import {
+  AuthorMessageType,
+  IMessage,
+  MessageAggregate,
+} from '@/models/message';
+import { MessageRepository } from '@/repositories/message';
 
 @Injectable()
 export class MessengerService {
@@ -23,6 +30,7 @@ export class MessengerService {
     private readonly _userRepository: UserRepository,
     private readonly _scriptRepository: ScriptRepository,
     private readonly _messageSessionRepository: MessageSessionRepository,
+    private readonly _messageRepository: MessageRepository,
     private readonly _connectionRepository: MessengerConnectionRepository,
   ) {}
 
@@ -125,5 +133,40 @@ export class MessengerService {
       filter: { field: 'id', value: connection.id },
     });
     return !!result.affected;
+  }
+
+  public async createMessage(dto: CreateMessageDto) {
+    const data: Partial<IMessage> = {
+      author_type: AuthorMessageType.SYSTEM,
+    };
+
+    if (dto.text) data.text = dto.text;
+
+    if (dto.operator_id && !dto.respondent_id) {
+      data.author_type = AuthorMessageType.OPERATOR;
+      data.operator_id = dto.operator_id;
+    }
+
+    if (dto.respondent_id && !dto.operator_id) {
+      data.author_type = AuthorMessageType.RESPONDENT;
+    }
+
+    const session = await this._messageSessionRepository.getOne({
+      filter: { field: 'id', value: dto.session_id },
+    });
+
+    if (!session) {
+      throw new CommonError({ messages: 'error.session.not_found' });
+    }
+
+    data.session_id = session.id;
+
+    const message = await this._messageRepository.create(
+      MessageAggregate.create(data).instance,
+    );
+
+    message.setSession(session);
+
+    return message;
   }
 }

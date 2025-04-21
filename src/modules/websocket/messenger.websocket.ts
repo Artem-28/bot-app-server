@@ -23,6 +23,9 @@ import { MessengerConnectionAggregate } from '@/models/messenger-connection';
 import { AuthDataRepository } from '@/repositories/auth-data';
 import { MessageSessionAggregate } from '@/models/message-session';
 import { UserRepository } from '@/repositories/user';
+import { OperatorMessageDto } from '@/modules/messenger/dto';
+import { MessageRepository } from '@/repositories/message';
+import { MessageAggregate } from '@/models/message';
 
 const SESSION_ROOM_KEY = '_session_room_';
 const PROJECT_ROOM_KEY = '_project_room_';
@@ -53,6 +56,8 @@ export class MessengerWebsocket
     this._dataSource,
   );
 
+  private readonly _messageRepository = new MessageRepository(this._dataSource);
+
   private readonly _respondentService = new RespondentService(
     this._respondentRepository,
     this._respondentFingerprintRepository,
@@ -68,6 +73,7 @@ export class MessengerWebsocket
     this._userRepository,
     this._scriptRepository,
     this._messageSessionRepository,
+    this._messageRepository,
     this._connectionRepository,
   );
 
@@ -136,7 +142,7 @@ export class MessengerWebsocket
     }
   }
 
-  private handleRespondentSendMessage(
+  private async handleRespondentSendMessage(
     connection: MessengerConnectionAggregate,
     dto: any,
   ) {
@@ -147,22 +153,16 @@ export class MessengerWebsocket
     if (!session) {
       throw new CommonError({ messages: 'invalid_session' });
     }
-
-    const message = {
+    const message = await this._messengerService.createMessage({
       session_id: session.id,
-      project_id: session.project_id,
-      script_id: session.script_id,
       text: dto.text,
-      from: session.respondent,
-    };
-    const rooms = [
-      PROJECT_ROOM_KEY + connection.project_id,
-      SESSION_ROOM_KEY + session.id,
-    ];
-    this.server.to(rooms).emit('onmessage', message);
+      respondent_id: session.respondent_id,
+    });
+    message.setAuthor(session.respondent);
+    this.emitMessage(message);
   }
 
-  private handleOperatorSendMessage(
+  private async handleOperatorSendMessage(
     connection: MessengerConnectionAggregate,
     dto: any,
   ) {
@@ -170,19 +170,25 @@ export class MessengerWebsocket
     if (!session) {
       throw new CommonError({ messages: 'invalid_session' });
     }
-    const message = {
+    const message = await this._messengerService.createMessage({
       session_id: session.id,
-      project_id: session.project_id,
-      script_id: session.script_id,
       text: dto.text,
-      from: connection.operator,
-      to: session.respondent,
-    };
-    const rooms = [
-      PROJECT_ROOM_KEY + connection.project_id,
-      SESSION_ROOM_KEY + session.id,
-    ];
-    this.server.to(rooms).emit('onmessage', message);
+      operator_id: connection.operator_id,
+    });
+    message.setAuthor(connection.operator);
+    this.emitMessage(message);
+  }
+
+  private emitMessage(message: MessageAggregate) {
+    const session = message.session;
+    this.server.to(PROJECT_ROOM_KEY + session.project_id).emit('onmessage', {
+      ...message.instance,
+      from: message.author,
+    });
+    this.server.to(SESSION_ROOM_KEY + session.id).emit('onmessage', {
+      ...message.instance,
+      from: { name: message.author.name },
+    });
   }
 
   private getSessionConnections(sessionId: number) {

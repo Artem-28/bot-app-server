@@ -10,6 +10,7 @@ import { ScriptRepository } from '@/repositories/script';
 import { MessageSessionRepository } from '@/repositories/message-session';
 import { MessengerConnectionRepository } from '@/repositories/messenger-connection';
 import { UserRepository } from '@/repositories/user';
+import { MessageRepository } from '@/repositories/message';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { UserRepository } from '@/repositories/user';
     ScriptRepository,
     MessageSessionRepository,
     MessengerConnectionRepository,
+    MessageRepository,
     UserRepository,
   ],
   controllers: [MessengerController],

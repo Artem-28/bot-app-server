@@ -58,7 +58,7 @@ export class RespondentAggregate
 
         const fingerprint = RespondentFingerprintAggregate.create({
           fingerprint: print.fingerprint,
-          project_id: this.project_id,
+          project_id: this.project_id || params.project_id,
           respondent_id: this.id,
         });
 
