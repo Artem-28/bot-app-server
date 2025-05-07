@@ -32,6 +32,14 @@ export class RespondentService {
     return this._respondentRepository.create(respondent);
   }
 
+  public async respondents(id: number | number[]) {
+    const ids = hToArray(id);
+    if (!ids.length) return [];
+    return this._respondentRepository.getMany({
+      filter: { field: 'id', value: ids },
+    });
+  }
+
   public projectRespondents(param: ParamProject) {
     return this._respondentRepository.getMany({
       filter: { field: 'project_id', value: param.project_id },

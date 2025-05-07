@@ -6,12 +6,15 @@ import {
   IsString,
 } from 'class-validator';
 import { BaseAggregate } from '@/models/base';
-import { UserAggregate } from '@/models/user';
+import { IUser, UserAggregate } from '@/models/user';
 import {
   IMessengerConnection,
   IMessengerConnectionInstance,
 } from '@/models/messenger-connection/messenger-connection.interface';
-import { MessageSessionAggregate } from '@/models/message-session';
+import {
+  IMessageSession,
+  MessageSessionAggregate,
+} from '@/models/message-session';
 
 export class MessengerConnectionAggregate
   extends BaseAggregate<IMessengerConnection>
@@ -64,15 +67,21 @@ export class MessengerConnectionAggregate
     const { operator, session, ...params } = data;
 
     if (session) {
-      this.session = MessageSessionAggregate.create(session);
-      this.session_id = session.id;
+      this.setSession(session);
     }
 
     if (operator) {
-      this.operator = UserAggregate.create(operator);
-      this.operator_id = operator.id;
+      this.setOperator(operator);
     }
 
     super.update(params);
+  }
+
+  public setOperator(data: IUser) {
+    this.operator = UserAggregate.create(data);
+  }
+
+  public setSession(data: IMessageSession) {
+    this.session = MessageSessionAggregate.create(data);
   }
 }

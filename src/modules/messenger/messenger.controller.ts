@@ -5,7 +5,12 @@ import {
 } from '@/common/interceptors';
 import { MessengerService } from '@/modules/messenger/messenger.service';
 import { FingerprintService } from '@/modules/fingerprint';
-import { ParamScript, ParamScriptTransformer } from '@/common/param';
+import {
+  ParamProject,
+  ParamProjectTransformer,
+  ParamScript,
+  ParamScriptTransformer,
+} from '@/common/param';
 
 @Controller('api/v1/projects/:project_id')
 export class MessengerController {
@@ -30,5 +35,10 @@ export class MessengerController {
       ...param,
       fingerprint,
     });
+  }
+
+  @Get('messengers')
+  public async getMessengers(@ParamProjectTransformer() param: ParamProject) {
+    return await this.messengerService.getMessengers(param.project_id);
   }
 }

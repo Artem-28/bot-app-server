@@ -9,10 +9,6 @@ export class CreateMessageDto {
   @IsOptional()
   operator_id?: number;
 
-  @IsNumber()
-  @IsOptional()
-  respondent_id?: number;
-
   @IsString()
   @IsOptional()
   text?: string;

@@ -1,5 +1,6 @@
 import { IBaseEntity } from '@/models/base';
 import { IRespondent } from '@/models/respondent';
+import { IMessage } from '@/models/message';
 
 export interface IMessageSessionInstance extends IBaseEntity {
   /** Индификатор проекта */
@@ -20,6 +21,7 @@ export interface IMessageSessionInstance extends IBaseEntity {
 
 export interface IMessageSessionRelation {
   respondent: IRespondent | null;
+  messages: IMessage[];
 }
 
 export type IMessageSession = IMessageSessionInstance & IMessageSessionRelation;

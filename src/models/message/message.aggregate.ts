@@ -9,8 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 import { MessageSessionAggregate } from '@/models/message-session';
-import { UserAggregate } from '@/models/user';
-import { RespondentAggregate } from '@/models/respondent';
+import { IUser, UserAggregate } from '@/models/user';
 
 export class MessageAggregate
   extends BaseAggregate<IMessage>
@@ -35,7 +34,8 @@ export class MessageAggregate
 
   session: MessageSessionAggregate | null = null;
 
-  author: UserAggregate | RespondentAggregate | null = null;
+  @IsOptional()
+  operator: UserAggregate | null = null;
 
   static create(data: Partial<IMessage>) {
     const _entity = new MessageAggregate();
@@ -47,8 +47,8 @@ export class MessageAggregate
     this.session = data;
   }
 
-  setAuthor(data: UserAggregate | RespondentAggregate) {
-    this.author = data;
+  setOperator(data: IUser) {
+    this.operator = UserAggregate.create(data);
   }
 
   get instance(): IMessage {
@@ -60,6 +60,21 @@ export class MessageAggregate
       text: this.text,
       crated_at: this.crated_at,
       updated_at: this.updated_at,
+    };
+  }
+
+  public transform() {
+    let operator: Partial<IUser> | null = null;
+    if (this.operator) {
+      operator = { name: this.operator.name };
+    }
+    return {
+      id: this.id,
+      text: this.text,
+      author_type: this.author_type,
+      crated_at: this.crated_at,
+      updated_at: this.updated_at,
+      operator,
     };
   }
 }

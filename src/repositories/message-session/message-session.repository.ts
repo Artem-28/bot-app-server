@@ -27,7 +27,7 @@ export class MessageSessionRepository
   }
 
   async getOne(
-    options?: BuilderOptionsDto<IMessageSession>,
+    options?: BuilderOptionsDto<IMessageSessionInstance>,
   ): Promise<MessageSessionAggregate | null> {
     const repository = this.getRepository(MessageSessionEntity);
     const query = HQueryBuilder.select(repository, options);
@@ -35,5 +35,26 @@ export class MessageSessionRepository
     const result = await query.builder.getOne();
     if (!result) return null;
     return MessageSessionAggregate.create(result);
+  }
+
+  async lastActiveSessions(project_id: number) {
+    const repository = this.getRepository(MessageSessionEntity);
+    const result = await repository
+      .createQueryBuilder('ms')
+      .where('ms.project_id = :project_id', { project_id })
+      .andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('MAX(sub.created_at)')
+          .from(MessageSessionEntity, 'sub')
+          .where('sub.project_id = ms.project_id')
+          .andWhere('sub.script_id = ms.script_id')
+          .getQuery();
+
+        return 'ms.updated_at IN (' + subQuery + ')';
+      })
+      .getMany();
+
+    return result.map((item) => MessageSessionAggregate.create(item));
   }
 }

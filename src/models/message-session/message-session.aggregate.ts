@@ -11,7 +11,8 @@ import {
   IMessageSession,
   IMessageSessionInstance,
 } from '@/models/message-session/message-session.interface';
-import { RespondentAggregate } from '@/models/respondent';
+import { IRespondent, RespondentAggregate } from '@/models/respondent';
+import { IMessage, MessageAggregate } from '@/models/message';
 
 export class MessageSessionAggregate
   extends BaseAggregate<IMessageSession>
@@ -45,6 +46,9 @@ export class MessageSessionAggregate
   @IsOptional()
   respondent: RespondentAggregate | null = null;
 
+  @IsOptional()
+  messages: MessageAggregate[] = [];
+
   static create(data: Partial<IMessageSession>) {
     const _entity = new MessageSessionAggregate();
     _entity.update(data);
@@ -52,12 +56,24 @@ export class MessageSessionAggregate
   }
 
   update(data: Partial<IMessageSession>) {
-    const { respondent, ...params } = data;
+    const { respondent, messages, ...params } = data;
+    if (messages) {
+      this.messages = [];
+      messages.forEach((message) => this.appendMessage(message));
+    }
     if (respondent) {
       this.respondent_id = respondent.id;
-      this.respondent = RespondentAggregate.create(respondent);
+      this.setRespondent(respondent);
     }
     super.update(params);
+  }
+
+  setRespondent(respondent: IRespondent) {
+    this.respondent = RespondentAggregate.create(respondent);
+  }
+
+  appendMessage(message: IMessage) {
+    this.messages.push(MessageAggregate.create(message));
   }
 
   get instance(): IMessageSessionInstance {

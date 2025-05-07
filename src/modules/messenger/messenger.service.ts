@@ -21,6 +21,14 @@ import {
   MessageAggregate,
 } from '@/models/message';
 import { MessageRepository } from '@/repositories/message';
+import { MapObject } from '@/common/types';
+import {
+  IMessengerGroup,
+  MessengerGroupAggregate,
+} from '@/models/messenger-group';
+import { ScriptAggregate } from '@/models/script';
+import { RespondentAggregate } from '@/models/respondent';
+import { UserAggregate } from '@/models/user';
 
 @Injectable()
 export class MessengerService {
@@ -99,7 +107,7 @@ export class MessengerService {
     }).instance;
 
     session = await this._messageSessionRepository.create(session_instance);
-    session.update({ respondent });
+    session.setRespondent(respondent);
     return session;
   }
 
@@ -123,7 +131,7 @@ export class MessengerService {
     }).instance;
 
     const connection = await this._connectionRepository.create(instance);
-    connection.update({ operator: user });
+    connection.setOperator(user);
 
     return connection;
   }
@@ -137,18 +145,14 @@ export class MessengerService {
 
   public async createMessage(dto: CreateMessageDto) {
     const data: Partial<IMessage> = {
-      author_type: AuthorMessageType.SYSTEM,
+      author_type: AuthorMessageType.RESPONDENT,
     };
 
     if (dto.text) data.text = dto.text;
 
-    if (dto.operator_id && !dto.respondent_id) {
+    if (dto.operator_id) {
       data.author_type = AuthorMessageType.OPERATOR;
       data.operator_id = dto.operator_id;
-    }
-
-    if (dto.respondent_id && !dto.operator_id) {
-      data.author_type = AuthorMessageType.RESPONDENT;
     }
 
     const session = await this._messageSessionRepository.getOne({
@@ -168,5 +172,85 @@ export class MessengerService {
     message.setSession(session);
 
     return message;
+  }
+
+  public async getMessengers(project_id: number) {
+    const scriptIds = new Set<number>();
+    const sessionIds = new Set<number>();
+    const respondentIds = new Set<number>();
+    const operatorIds = new Set<number>();
+
+    const scriptMap: MapObject<ScriptAggregate> = {};
+    const sessionLastMessageMap: MapObject<MessageAggregate> = {};
+    const respondentMap: MapObject<RespondentAggregate> = {};
+    const operatorMap: MapObject<UserAggregate> = {};
+
+    const sessions =
+      await this._messageSessionRepository.lastActiveSessions(project_id);
+
+    sessions.forEach((session) => {
+      sessionIds.add(session.id);
+      scriptIds.add(session.script_id);
+      respondentIds.add(session.respondent_id);
+    });
+
+    const respondents = await this._respondentService.respondents([
+      ...respondentIds,
+    ]);
+
+    const messages = await this._messageRepository.lastMessages([
+      ...sessionIds,
+    ]);
+
+    const scripts = await this._scriptRepository.getMany({
+      filter: { field: 'id', value: [...scriptIds] },
+    });
+
+    respondents.forEach(
+      (respondent) => (respondentMap[respondent.id] = respondent),
+    );
+
+    scripts.forEach((script) => (scriptMap[script.id] = script));
+
+    messages.forEach((message) => {
+      operatorIds.add(message.operator_id);
+      sessionLastMessageMap[message.session_id] = message;
+    });
+
+    const operators = await this._userRepository.getMany({
+      filter: { field: 'id', value: [...operatorIds] },
+    });
+
+    operators.forEach((operator) => (operatorMap[operator.id] = operator));
+
+    return sessions.map((session) => {
+      const message = sessionLastMessageMap[session.id];
+      const operator = operatorMap[message?.operator_id];
+      const respondent = respondentMap[session.respondent_id];
+      const script = scriptMap[session.script_id];
+
+      if (operator) {
+        message.setOperator(operator);
+      }
+      if (respondent) {
+        session.setRespondent(respondent);
+      }
+      if (message) {
+        session.appendMessage(message);
+      }
+
+      const data: IMessengerGroup = {
+        id: session.script_id,
+        title: 'remove.script',
+        updated_at: session.updated_at,
+        sessions: [session],
+      };
+
+      if (script) {
+        data.title = script.title;
+      }
+
+      return MessengerGroupAggregate.create(data);
+    });
   }
 }
