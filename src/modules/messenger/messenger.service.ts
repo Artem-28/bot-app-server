@@ -10,7 +10,7 @@ import { RespondentService } from '@/modules/respondent';
 import { ScriptRepository } from '@/repositories/script';
 import { CommonError, errors } from '@/common/error';
 import { MessageSessionRepository } from '@/repositories/message-session';
-import { MessageSessionAggregate } from '@/models/message-session';
+import { MessageSessionAggregate, SessionMode } from '@/models/message-session';
 import { JwtService } from '@nestjs/jwt';
 import { MessengerConnectionRepository } from '@/repositories/messenger-connection';
 import { MessengerConnectionAggregate } from '@/models/messenger-connection';
@@ -29,6 +29,7 @@ import {
 import { ScriptAggregate } from '@/models/script';
 import { RespondentAggregate } from '@/models/respondent';
 import { UserAggregate } from '@/models/user';
+import { IsNull, Not } from 'typeorm';
 
 @Injectable()
 export class MessengerService {
@@ -103,7 +104,7 @@ export class MessengerService {
       project_id: script.project_id,
       script_id: script.id,
       respondent_id: respondent.id,
-      title: script.title,
+      mode: SessionMode.OPERATOR,
     }).instance;
 
     session = await this._messageSessionRepository.create(session_instance);
@@ -169,6 +170,9 @@ export class MessengerService {
       MessageAggregate.create(data).instance,
     );
 
+    session.active();
+    await this._messageSessionRepository.update(session.id, session.instance);
+
     message.setSession(session);
 
     return message;
@@ -180,10 +184,10 @@ export class MessengerService {
     const respondentIds = new Set<number>();
     const operatorIds = new Set<number>();
 
-    const scriptMap: MapObject<ScriptAggregate> = {};
-    const sessionLastMessageMap: MapObject<MessageAggregate> = {};
-    const respondentMap: MapObject<RespondentAggregate> = {};
-    const operatorMap: MapObject<UserAggregate> = {};
+    const scriptMap = new Map<number, ScriptAggregate>();
+    const sessionLastMessageMap = new Map<number, MessageAggregate>();
+    const respondentMap = new Map<number, RespondentAggregate>();
+    const operatorMap = new Map<number, UserAggregate>();
 
     const sessions =
       await this._messageSessionRepository.lastActiveSessions(project_id);
@@ -206,51 +210,135 @@ export class MessengerService {
       filter: { field: 'id', value: [...scriptIds] },
     });
 
-    respondents.forEach(
-      (respondent) => (respondentMap[respondent.id] = respondent),
-    );
+    respondents.forEach((respondent) => {
+      respondentMap.set(respondent.id, respondent);
+    });
 
-    scripts.forEach((script) => (scriptMap[script.id] = script));
+    scripts.forEach((script) => {
+      scriptMap.set(script.id, script);
+    });
 
     messages.forEach((message) => {
       operatorIds.add(message.operator_id);
-      sessionLastMessageMap[message.session_id] = message;
+      sessionLastMessageMap.set(message.session_id, message);
     });
 
     const operators = await this._userRepository.getMany({
       filter: { field: 'id', value: [...operatorIds] },
     });
 
-    operators.forEach((operator) => (operatorMap[operator.id] = operator));
+    operators.forEach((operator) => {
+      operatorMap.set(operator.id, operator);
+    });
 
     return sessions.map((session) => {
-      const message = sessionLastMessageMap[session.id];
-      const operator = operatorMap[message?.operator_id];
-      const respondent = respondentMap[session.respondent_id];
-      const script = scriptMap[session.script_id];
+      const message = sessionLastMessageMap.get(session.id);
+      const operator = operatorMap.get(message?.operator_id);
+      const respondent = respondentMap.get(session.respondent_id);
+      const script = scriptMap.get(session.script_id);
 
-      if (operator) {
-        message.setOperator(operator);
-      }
-      if (respondent) {
-        session.setRespondent(respondent);
-      }
-      if (message) {
-        session.appendMessage(message);
-      }
+      if (operator) message.setOperator(operator);
+      if (respondent) session.setRespondent(respondent);
+      if (message) session.appendMessage(message);
 
       const data: IMessengerGroup = {
         id: session.script_id,
         title: 'remove.script',
-        updated_at: session.updated_at,
         sessions: [session],
       };
 
-      if (script) {
-        data.title = script.title;
-      }
+      if (script) data.title = script.title;
 
       return MessengerGroupAggregate.create(data);
     });
+  }
+
+  public async activeSessions(script_id: number) {
+    const sessionIds = new Set<number>();
+    const respondentIds = new Set<number>();
+    const operatorIds = new Set<number>();
+
+    const respondentMap = new Map<number, RespondentAggregate>();
+    const sessionLastMessageMap = new Map<number, MessageAggregate>();
+    const operatorMap = new Map<number, UserAggregate>();
+
+    const sessions = await this._messageSessionRepository.getMany({
+      filter: [
+        { field: 'script_id', value: script_id },
+        { field: 'last_active_at', value: 'IS NOT NULL' },
+      ],
+    });
+
+    sessions.forEach((session) => {
+      sessionIds.add(session.id);
+      respondentIds.add(session.respondent_id);
+    });
+
+    const respondents = await this._respondentService.respondents([
+      ...respondentIds,
+    ]);
+
+    respondents.forEach((respondent) => {
+      respondentMap.set(respondent.id, respondent);
+    });
+
+    const messages = await this._messageRepository.lastMessages([
+      ...sessionIds,
+    ]);
+
+    messages.forEach((message) => {
+      sessionLastMessageMap.set(message.session_id, message);
+    });
+
+    const operators = await this._userRepository.getMany({
+      filter: { field: 'id', value: [...operatorIds] },
+    });
+
+    operators.forEach((operator) => {
+      operatorMap.set(operator.id, operator);
+    });
+
+    sessions.forEach((session) => {
+      const respondent = respondentMap.get(session.respondent_id);
+      const message = sessionLastMessageMap.get(session.id);
+      const operator = operatorMap.get(message?.operator_id);
+
+      if (operator) message.setOperator(operator);
+      if (respondent) session.setRespondent(respondent);
+      if (message) session.appendMessage(message);
+    });
+
+    return sessions;
+  }
+
+  public async sessionHistory(session_id: number) {
+    const operatorIds = new Set<number>();
+    const operatorMap = new Map<number, UserAggregate>();
+
+    const messages = await this._messageRepository.getMany({
+      filter: { field: 'session_id', value: session_id },
+    });
+
+    messages.forEach((message) => {
+      if (!message.operator_id) return;
+      operatorIds.add(message.operator_id);
+    });
+
+    const operators = await this._userRepository.getMany({
+      filter: { field: 'id', value: [...operatorIds] },
+    });
+
+    operators.forEach((operator) => {
+      operatorMap.set(operator.id, operator);
+    });
+
+    messages.forEach((message) => {
+      const operator = operatorMap.get(message.operator_id);
+      if (operator) {
+        message.setOperator(operator);
+      }
+    });
+
+    return messages;
   }
 }

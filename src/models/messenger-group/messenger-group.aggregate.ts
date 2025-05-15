@@ -21,7 +21,7 @@ export class MessengerGroupAggregate implements IMessengerGroup {
 
   @IsDate()
   @IsDefined()
-  updated_at: Date;
+  last_active_at: Date;
 
   @IsOptional()
   sessions: MessageSessionAggregate[] = [];
@@ -39,6 +39,11 @@ export class MessengerGroupAggregate implements IMessengerGroup {
       this.sessions = sessions.map((session) =>
         MessageSessionAggregate.create(session),
       );
+    }
+
+    if (this.sessions.length) {
+      const lastSession = this.sessions[this.sessions.length - 1];
+      this.last_active_at = lastSession.last_active_at;
     }
 
     const entries = Object.entries(params);

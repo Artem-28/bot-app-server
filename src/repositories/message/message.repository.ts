@@ -5,9 +5,8 @@ import { REQUEST } from '@nestjs/core';
 
 import { MessageRepositoryDomain } from '@/repositories/message';
 import { IMessage, MessageAggregate, MessageEntity } from '@/models/message';
-import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
-import { ProjectEntity } from '@/models/project';
 import { hToArray } from '@/common/utils/formatter';
+import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
 
 @Injectable()
 export class MessageRepository
@@ -48,6 +47,16 @@ export class MessageRepository
       .setParameter('sessionIds', sessionIds)
       .getMany();
 
+    return result.map((item) => MessageAggregate.create(item));
+  }
+
+  async getMany(
+    options?: BuilderOptionsDto<IMessage>,
+  ): Promise<MessageAggregate[]> {
+    const repository = this.getRepository(MessageEntity);
+    const query = HQueryBuilder.select(repository, options);
+    const result = await query.builder.getMany();
+    if (!result) return null;
     return result.map((item) => MessageAggregate.create(item));
   }
 }

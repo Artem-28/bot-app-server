@@ -241,12 +241,14 @@ export class MessengerWebsocket
   // Обработка сообщения от респондента
   private async handleRespondentSendMessage(dto: CreateMessageDto) {
     const message = await this._messengerService.createMessage(dto);
+    this.setSession(message.session);
     this.emitMessage(message);
   }
 
   // Обработка сообщения от оператора
   private async handleOperatorSendMessage(dto: CreateMessageDto) {
     const message = await this._messengerService.createMessage(dto);
+    this.setSession(message.session);
     this.emitMessage(message);
   }
 

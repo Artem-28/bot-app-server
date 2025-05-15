@@ -75,6 +75,7 @@ export class MessageAggregate
       crated_at: this.crated_at,
       updated_at: this.updated_at,
       operator,
+      session: this.session,
     };
   }
 }
