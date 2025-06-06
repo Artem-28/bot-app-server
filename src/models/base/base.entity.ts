@@ -10,7 +10,7 @@ export abstract class BaseEntity implements IBaseEntity {
   id: number;
 
   @CreateDateColumn({ name: 'created_at' })
-  crated_at: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;

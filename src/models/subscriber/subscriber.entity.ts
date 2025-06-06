@@ -17,5 +17,5 @@ export class SubscriberEntity {
   public project_id: number;
 
   @CreateDateColumn({ name: 'created_at' })
-  crated_at: Date;
+  created_at: Date;
 }

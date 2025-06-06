@@ -1,22 +1,27 @@
 import {
   IsDate,
   IsDefined,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  validateSync,
 } from 'class-validator';
-import { BaseAggregate } from '@/models/base';
 import {
   IMessageSession,
   IMessageSessionInstance,
+  SessionMode,
 } from '@/models/message-session/message-session.interface';
-import { RespondentAggregate } from '@/models/respondent';
+import { IRespondent, RespondentAggregate } from '@/models/respondent';
+import { IMessage, MessageAggregate } from '@/models/message';
+import { DomainError } from '@/common/error';
 
-export class MessageSessionAggregate
-  extends BaseAggregate<IMessageSession>
-  implements IMessageSession
-{
+export class MessageSessionAggregate implements IMessageSession {
+  @IsOptional()
+  @IsNumber()
+  id?: number;
+
   /** Индификатор проекта */
   @IsNumber()
   @IsDefined()
@@ -32,18 +37,26 @@ export class MessageSessionAggregate
   @IsDefined()
   respondent_id: number;
 
-  /** Название сессии */
-  @IsString()
-  @IsNotEmpty()
   @IsDefined()
-  title: string;
+  @IsEnum(SessionMode)
+  mode: SessionMode = SessionMode.SYSTEM;
 
   @IsDate()
   @IsOptional()
-  end_at: Date | null = null;
+  close_at: Date | null = null;
+
+  @IsDate()
+  @IsOptional()
+  last_active_at: Date | null = null;
+
+  @IsDate()
+  created_at = new Date();
 
   @IsOptional()
   respondent: RespondentAggregate | null = null;
+
+  @IsOptional()
+  messages: MessageAggregate[] = [];
 
   static create(data: Partial<IMessageSession>) {
     const _entity = new MessageSessionAggregate();
@@ -52,12 +65,40 @@ export class MessageSessionAggregate
   }
 
   update(data: Partial<IMessageSession>) {
-    const { respondent, ...params } = data;
+    const { respondent, messages, ...params } = data;
+    if (messages) {
+      this.messages = [];
+      messages.forEach((message) => this.appendMessage(message));
+    }
     if (respondent) {
       this.respondent_id = respondent.id;
-      this.respondent = RespondentAggregate.create(respondent);
+      this.setRespondent(respondent);
     }
-    super.update(params);
+
+    const entries = Object.entries(params);
+    if (entries.length === 0) return;
+
+    entries.forEach(([key, value]) => {
+      this[key] = value;
+    });
+    this.created_at = this.id ? this.created_at : new Date();
+
+    const errors = validateSync(this, { whitelist: true });
+    if (!!errors.length) {
+      throw new DomainError(errors);
+    }
+  }
+
+  setRespondent(respondent: IRespondent) {
+    this.respondent = RespondentAggregate.create(respondent);
+  }
+
+  appendMessage(message: IMessage) {
+    this.messages.push(MessageAggregate.create(message));
+  }
+
+  active() {
+    this.last_active_at = new Date();
   }
 
   get instance(): IMessageSessionInstance {
@@ -66,10 +107,10 @@ export class MessageSessionAggregate
       project_id: this.project_id,
       script_id: this.script_id,
       respondent_id: this.respondent_id,
-      title: this.title,
-      end_at: this.end_at,
-      crated_at: this.crated_at,
-      updated_at: this.updated_at,
+      mode: this.mode,
+      created_at: this.created_at,
+      close_at: this.close_at,
+      last_active_at: this.last_active_at,
     };
   }
 }

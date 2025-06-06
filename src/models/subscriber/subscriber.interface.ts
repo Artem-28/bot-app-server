@@ -8,12 +8,12 @@ export interface ISubscriber {
   /** Идентификатор проекта */
   project_id: number;
 
-  crated_at: Date;
+  created_at: Date;
 }
 
 export interface ISubscriberUser
   extends IBaseEntity,
-    Pick<IUser, 'name' | 'last_active_at' | 'email' | 'crated_at'> {
+    Pick<IUser, 'name' | 'last_active_at' | 'email' | 'created_at'> {
   /** Идентификатор проекта */
   project_id: number;
 

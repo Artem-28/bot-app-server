@@ -23,7 +23,7 @@ export class ScriptAggregate extends BaseAggregate<IScript> implements IScript {
       id: this.id,
       project_id: this.project_id,
       title: this.title,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
     };
   }

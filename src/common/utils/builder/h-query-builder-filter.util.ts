@@ -19,7 +19,9 @@ export class HQueryBuilderFilter<T> {
   }
 
   get value(): MapObject<string> {
-    if (this._filter.value === null) return {};
+    if (this._filter.value === null || this._filter.value === 'IS NOT NULL') {
+      return {};
+    }
     const dataField = String(this._filter.field).split('.');
     const field = dataField[dataField.length - 1];
     return { [field]: this._filter.value };
@@ -39,13 +41,16 @@ export class HQueryBuilderFilter<T> {
     const dataField = String(this._filter.field).split('.');
     const field = dataField[dataField.length - 1];
     if (Array.isArray(this._filter.value)) return ` (:...${field})`;
-    if (this._filter.value === null) return '';
+    if (this._filter.value === null || this._filter.value === 'IS NOT NULL') {
+      return '';
+    }
     return ` :${field}`;
   }
 
   private get _operator(): string {
     if (Array.isArray(this._filter.value)) return ' IN';
     if (this._filter.value === null) return ' IS NULL';
+    if (this._filter.value === 'IS NOT NULL') return ' IS NOT NULL';
     return ' =';
   }
 

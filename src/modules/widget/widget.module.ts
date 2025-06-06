@@ -1,27 +1,31 @@
 import { Module } from '@nestjs/common';
-import { MessengerService } from './messenger.service';
-import { MessengerController } from './messenger.controller';
-import { RespondentRepository } from '@/repositories/respondent';
+import { WidgetService } from './widget.service';
+import { WidgetController } from './widget.controller';
+import { MessengerService } from '@/modules/messenger';
+import { FingerprintService } from '@/modules/fingerprint';
 import { RespondentService } from '@/modules/respondent';
+import { FingerprintRepository } from '@/repositories/fingerprint';
 import { RespondentFingerprintRepository } from '@/repositories/respondent-fingerprint';
+import { RespondentRepository } from '@/repositories/respondent';
 import { ScriptRepository } from '@/repositories/script';
 import { MessageSessionRepository } from '@/repositories/message-session';
 import { MessengerConnectionRepository } from '@/repositories/messenger-connection';
-import { UserRepository } from '@/repositories/user';
 import { MessageRepository } from '@/repositories/message';
+import { UserRepository } from '@/repositories/user';
 
 @Module({
   providers: [
-    MessengerService,
+    WidgetService,
+    FingerprintService,
+    FingerprintRepository,
+    ScriptRepository,
     RespondentService,
     RespondentFingerprintRepository,
     RespondentRepository,
-    ScriptRepository,
     MessageSessionRepository,
-    MessengerConnectionRepository,
     MessageRepository,
     UserRepository,
   ],
-  controllers: [MessengerController],
+  controllers: [WidgetController],
 })
-export class MessengerModule {}
+export class WidgetModule {}

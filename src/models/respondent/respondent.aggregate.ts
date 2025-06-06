@@ -44,7 +44,8 @@ export class RespondentAggregate
 
   static create(data: Partial<IRespondent>) {
     const _entity = new RespondentAggregate();
-    _entity.update(data);
+    const defaultData = { name: 'respondent.new' };
+    _entity.update({ ...defaultData, ...data });
     return _entity;
   }
 
@@ -58,7 +59,7 @@ export class RespondentAggregate
 
         const fingerprint = RespondentFingerprintAggregate.create({
           fingerprint: print.fingerprint,
-          project_id: this.project_id,
+          project_id: this.project_id || params.project_id,
           respondent_id: this.id,
         });
 
@@ -77,7 +78,7 @@ export class RespondentAggregate
       patronymic: this.patronymic,
       email: this.email,
       phone: this.phone,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
       fingerprints: this.fingerprints,
     };

@@ -18,11 +18,21 @@ import { RespondentFingerprintRepository } from '@/repositories/respondent-finge
 import { CommonError } from '@/common/error';
 import { jwtConfig } from '@/providers/jwt';
 import { MessengerConnectionRepository } from '@/repositories/messenger-connection';
-import { MapObject } from '@/common/types';
-import { MessengerConnectionAggregate } from '@/models/messenger-connection';
+import {
+  IMessengerConnectionInstance,
+  MessengerConnectionAggregate,
+} from '@/models/messenger-connection';
 import { AuthDataRepository } from '@/repositories/auth-data';
-import { MessageSessionAggregate } from '@/models/message-session';
+import {
+  IMessageSessionInstance,
+  MessageSessionAggregate,
+} from '@/models/message-session';
 import { UserRepository } from '@/repositories/user';
+import { MessageRepository } from '@/repositories/message';
+import { MessageAggregate } from '@/models/message';
+import { IUser, UserAggregate } from '@/models/user';
+import { IRespondent, RespondentAggregate } from '@/models/respondent';
+import { CreateMessageDto } from '@/modules/messenger/dto';
 
 const SESSION_ROOM_KEY = '_session_room_';
 const PROJECT_ROOM_KEY = '_project_room_';
@@ -33,9 +43,10 @@ export class MessengerWebsocket
 {
   @WebSocketServer()
   server: Server;
-
-  private _connectionMap: MapObject<MessengerConnectionAggregate> = {};
-  private _sessionMap: MapObject<MessageSessionAggregate> = {};
+  private _connections = new Map<string, IMessengerConnectionInstance>();
+  private _operators = new Map<number, IUser>();
+  private _respondents = new Map<number, IRespondent>();
+  private _sessions = new Map<number, IMessageSessionInstance>();
 
   private readonly _respondentRepository = new RespondentRepository(
     this._dataSource,
@@ -53,6 +64,8 @@ export class MessengerWebsocket
     this._dataSource,
   );
 
+  private readonly _messageRepository = new MessageRepository(this._dataSource);
+
   private readonly _respondentService = new RespondentService(
     this._respondentRepository,
     this._respondentFingerprintRepository,
@@ -68,6 +81,7 @@ export class MessengerWebsocket
     this._userRepository,
     this._scriptRepository,
     this._messageSessionRepository,
+    this._messageRepository,
     this._connectionRepository,
   );
 
@@ -77,132 +91,111 @@ export class MessengerWebsocket
     private readonly _jwtService: JwtService,
   ) {}
 
-  async handleConnection(socket: Socket) {
-    try {
-      const data = await this.getConnectionData(socket);
+  private setSession(session: MessageSessionAggregate) {
+    if (!session) return;
+    this._sessions.set(session.id, session.instance);
+  }
 
-      if (!data.is_respondent) {
-        const connection = await this._messengerService.operatorConnect({
-          client_id: data.client_id,
-          project_id: data.project_id,
-          operator_login: data.operator_login,
-        });
-        this._connectionMap[connection.client_id] = connection;
-        socket.join(PROJECT_ROOM_KEY + connection.project_id);
-        return;
+  private removeSession(id: number) {
+    const session = this._sessions.get(id);
+    if (!session) return;
+    this._sessions.delete(id);
+
+    let isRemoveRespondent = true;
+
+    this._sessions.forEach((s) => {
+      if (isRemoveRespondent && session.respondent_id === s.respondent_id) {
+        isRemoveRespondent = false;
       }
-      const session = await this._messengerService.actualSession({
-        project_id: data.project_id,
-        script_id: data.script_id,
-        respondent_id: data.respondent_id,
-      });
-      const connection = await this._messengerService.respondentConnect({
-        client_id: data.client_id,
-        project_id: session.project_id,
-        session_id: session.id,
-      });
-      this._sessionMap[session.id] = session;
-      this._connectionMap[connection.client_id] = connection;
-      socket.join(SESSION_ROOM_KEY + session.id);
-    } catch (e) {
-      throw new CommonError({ messages: e });
+    });
+
+    if (isRemoveRespondent) {
+      this.removeRespondent(session.respondent_id);
     }
   }
 
-  async handleDisconnect(socket: Socket) {
-    const connection = this._connectionMap[socket.id];
+  private setOperator(operator: UserAggregate) {
+    if (!operator) return;
+    this._operators.set(operator.id, operator.instance);
+  }
+
+  private getOperator(id: number) {
+    const data = this._operators.get(id);
+    if (!data) return null;
+    return UserAggregate.create(data);
+  }
+
+  private removeOperator(id: number) {
+    this._operators.delete(id);
+  }
+
+  private setConnection(connection: MessengerConnectionAggregate) {
     if (!connection) return;
-
-    await this._messengerService.disconnect(connection);
-    delete this._connectionMap[socket.id];
-    if (!connection.session_id) return;
-
-    const connections = this.getSessionConnections(connection.session_id);
-    if (connections.length > 0) return;
-
-    delete this._sessionMap[connection.session_id];
+    this._connections.set(connection.client_id, connection.instance);
   }
 
-  @SubscribeMessage('send_message')
-  async sendMessage(socket: Socket, dto: any) {
-    const connection = this._connectionMap[socket.id];
+  private removeConnection(id: string) {
+    const connection = this._connections.get(id);
     if (!connection) return;
-    if (connection.operator_id) {
-      this.handleOperatorSendMessage(connection, dto);
-      return;
+    this._connections.delete(id);
+
+    let isRemoveOperator = !!connection.operator_id;
+    let isRemoveSession = !!connection.session_id;
+
+    this._connections.forEach((connect) => {
+      if (isRemoveOperator && connection.operator_id === connect.operator_id) {
+        isRemoveOperator = false;
+      }
+      if (isRemoveSession && connection.session_id === connect.session_id) {
+        isRemoveSession = false;
+      }
+    });
+
+    if (isRemoveOperator) {
+      this.removeOperator(connection.operator_id);
     }
-    if (connection.session_id) {
-      this.handleRespondentSendMessage(connection, dto);
+
+    if (isRemoveSession) {
+      this.removeSession(connection.session_id);
     }
   }
 
-  private handleRespondentSendMessage(
-    connection: MessengerConnectionAggregate,
-    dto: any,
-  ) {
-    const session = this._sessionMap[
-      connection.session_id
-    ] as MessageSessionAggregate;
+  private getConnection(id: string) {
+    const data = this._connections.get(id);
+    if (!data) return null;
 
-    if (!session) {
-      throw new CommonError({ messages: 'invalid_session' });
+    const connection = MessengerConnectionAggregate.create(data);
+
+    const operator = this.getOperator(connection.operator_id);
+    if (operator) {
+      connection.setOperator(operator);
     }
 
-    const message = {
-      session_id: session.id,
-      project_id: session.project_id,
-      script_id: session.script_id,
-      text: dto.text,
-      from: session.respondent,
-    };
-    const rooms = [
-      PROJECT_ROOM_KEY + connection.project_id,
-      SESSION_ROOM_KEY + session.id,
-    ];
-    this.server.to(rooms).emit('onmessage', message);
+    return connection;
   }
 
-  private handleOperatorSendMessage(
-    connection: MessengerConnectionAggregate,
-    dto: any,
-  ) {
-    const session = this._sessionMap[dto.session_id] as MessageSessionAggregate;
-    if (!session) {
-      throw new CommonError({ messages: 'invalid_session' });
-    }
-    const message = {
-      session_id: session.id,
-      project_id: session.project_id,
-      script_id: session.script_id,
-      text: dto.text,
-      from: connection.operator,
-      to: session.respondent,
-    };
-    const rooms = [
-      PROJECT_ROOM_KEY + connection.project_id,
-      SESSION_ROOM_KEY + session.id,
-    ];
-    this.server.to(rooms).emit('onmessage', message);
+  private setRespondent(respondent: RespondentAggregate) {
+    if (!respondent) return;
+    this._respondents.set(respondent.id, respondent.instance);
   }
 
-  private getSessionConnections(sessionId: number) {
-    return Object.values(this._connectionMap).filter(
-      (connection) => connection.session_id === sessionId,
-    );
+  private getRespondent(id: number) {
+    const data = this._respondents.get(id);
+    if (!data) return null;
+    return RespondentAggregate.create(data);
+  }
+
+  private removeRespondent(id: number) {
+    this._respondents.delete(id);
   }
 
   private async getConnectionData(socket: Socket) {
     const headers = socket.handshake.headers;
 
-    let project_id: number | null = null;
+    let project_id: number | null = Number(headers['project-id']);
     let script_id: number | null = null;
     let operator_login: string | null = null;
     let respondent_id: number | null = null;
-
-    if (typeof headers['project-id'] !== 'string') {
-      throw new CommonError({ messages: 'errors.invalid_headers' });
-    }
-    project_id = Number(headers['project-id']);
 
     const token = headers['authorization'] as string;
     if (!token) {
@@ -210,6 +203,9 @@ export class MessengerWebsocket
     }
 
     const data = this._jwtService.verify(token, jwtConfig.verifyOptions);
+    if (data.project_id) {
+      project_id = data.project_id;
+    }
     if (data.script_id) {
       script_id = data.script_id;
     }
@@ -226,7 +222,7 @@ export class MessengerWebsocket
     const is_operator = !!operator_login;
     const is_respondent = !is_operator && !!respondent_id && !!script_id;
 
-    if (!is_respondent && !is_operator) {
+    if ((!is_respondent && !is_operator) || !project_id) {
       throw new CommonError({ messages: 'invalid_token' }, 403);
     }
 
@@ -238,5 +234,110 @@ export class MessengerWebsocket
       respondent_id,
       operator_login,
     };
+  }
+
+  // Обработка сообщения от респондента
+  private async handleRespondentSendMessage(dto: CreateMessageDto) {
+    const message = await this._messengerService.createMessage(dto);
+    this.setSession(message.session);
+    this.emitMessage(message);
+  }
+
+  // Обработка сообщения от оператора
+  private async handleOperatorSendMessage(dto: CreateMessageDto) {
+    const message = await this._messengerService.createMessage(dto);
+    this.setSession(message.session);
+    this.emitMessage(message);
+  }
+
+  private emitMessage(message: MessageAggregate) {
+    const session = message.session;
+
+    const respondent = this.getRespondent(session.respondent_id);
+    if (respondent) {
+      message.session.setRespondent(respondent);
+    }
+
+    const operator = this.getOperator(message.operator_id);
+    if (operator) {
+      message.setOperator(operator);
+    }
+    // Сообщения для операторов
+    this.server
+      .to(PROJECT_ROOM_KEY + session.project_id)
+      .emit('onmessage', message);
+    // Сообщения для респондентов
+    this.server
+      .to(SESSION_ROOM_KEY + session.id)
+      .emit('onmessage', message.transform());
+  }
+
+  async handleConnection(socket: Socket) {
+    try {
+      const data = await this.getConnectionData(socket);
+
+      if (!data.is_respondent) {
+        const connection = await this._messengerService.operatorConnect({
+          client_id: data.client_id,
+          project_id: data.project_id,
+          operator_login: data.operator_login,
+        });
+        this.setConnection(connection);
+        this.setOperator(connection.operator);
+
+        socket.join(PROJECT_ROOM_KEY + connection.project_id);
+        return;
+      }
+
+      const session = await this._messengerService.actualSession({
+        project_id: data.project_id,
+        script_id: data.script_id,
+        respondent_id: data.respondent_id,
+      });
+      const connection = await this._messengerService.respondentConnect({
+        client_id: data.client_id,
+        project_id: session.project_id,
+        session_id: session.id,
+      });
+      this.setConnection(connection);
+      this.setSession(session);
+      this.setRespondent(session.respondent);
+
+      socket.join(SESSION_ROOM_KEY + session.id);
+    } catch (e) {
+      throw new CommonError({ messages: e });
+    }
+  }
+
+  async handleDisconnect(socket: Socket) {
+    const connection = this.getConnection(socket.id);
+    if (!connection) return;
+
+    this.removeConnection(socket.id);
+    await this._messengerService.disconnect(connection);
+  }
+
+  @SubscribeMessage('send_message')
+  async sendMessage(socket: Socket, dto: any) {
+    const connection = this.getConnection(socket.id);
+    if (!connection) return;
+
+    // Сообщение отправляет оператор
+    if (connection.operator_id) {
+      await this.handleOperatorSendMessage({
+        session_id: dto.session_id,
+        text: dto.text,
+        operator_id: connection.operator_id,
+      });
+      return;
+    }
+
+    // Сообщение отправляет респондент
+    if (connection.session_id) {
+      await this.handleRespondentSendMessage({
+        session_id: connection.session_id,
+        text: dto.text,
+      });
+    }
   }
 }

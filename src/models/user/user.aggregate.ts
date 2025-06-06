@@ -53,7 +53,7 @@ export class UserAggregate extends BaseAggregate<IUser> implements IUser {
       phone_verified_at: this.phone_verified_at,
       last_active_at: this.last_active_at,
       license_agreement: this.license_agreement,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
     };
   }

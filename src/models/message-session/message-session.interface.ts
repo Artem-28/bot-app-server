@@ -1,7 +1,13 @@
-import { IBaseEntity } from '@/models/base';
 import { IRespondent } from '@/models/respondent';
+import { IMessage } from '@/models/message';
 
-export interface IMessageSessionInstance extends IBaseEntity {
+export enum SessionMode {
+  OPERATOR = 'operator',
+  SYSTEM = 'system',
+}
+
+export interface IMessageSessionInstance {
+  id?: number;
   /** Индификатор проекта */
   project_id: number;
 
@@ -11,15 +17,22 @@ export interface IMessageSessionInstance extends IBaseEntity {
   /** Индификатор респондента */
   respondent_id: number;
 
-  /** Название сессии */
-  title: string;
+  /** Режим работы сессии */
+  mode: SessionMode;
 
-  /** Время окончания сессии */
-  end_at: Date | null;
+  /** Время закрытия сессии сессии */
+  close_at: Date | null;
+
+  /** Время последней активности */
+  last_active_at: Date | null;
+
+  /** Время создания сессии */
+  created_at: Date;
 }
 
 export interface IMessageSessionRelation {
   respondent: IRespondent | null;
+  messages: IMessage[];
 }
 
 export type IMessageSession = IMessageSessionInstance & IMessageSessionRelation;

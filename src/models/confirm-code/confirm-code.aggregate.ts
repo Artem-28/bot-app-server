@@ -54,7 +54,7 @@ export class ConfirmCodeAggregate
 
   get instance(): IConfirmCode {
     return {
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
       value: this.value,
       type: this.type,

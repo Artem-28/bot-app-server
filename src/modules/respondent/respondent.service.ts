@@ -32,6 +32,14 @@ export class RespondentService {
     return this._respondentRepository.create(respondent);
   }
 
+  public async respondents(id: number | number[]) {
+    const ids = hToArray(id);
+    if (!ids.length) return [];
+    return this._respondentRepository.getMany({
+      filter: { field: 'id', value: ids },
+    });
+  }
+
   public projectRespondents(param: ParamProject) {
     return this._respondentRepository.getMany({
       filter: { field: 'project_id', value: param.project_id },
@@ -87,13 +95,7 @@ export class RespondentService {
         { field: 'fingerprint', value: fingerprint, operator: 'and' },
       ],
     });
-    if (!respondentFingerprint) {
-      return this.create({
-        project_id: projectId,
-        name: 'respondent.new',
-        fingerprints: hToArray(fingerprint),
-      });
-    }
+    if (!respondentFingerprint) return null;
 
     return this._respondentRepository.getOne({
       filter: { field: 'id', value: respondentFingerprint.respondent_id },
