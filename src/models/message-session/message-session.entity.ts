@@ -40,7 +40,7 @@ export class MessageSessionEntity {
   public last_active_at: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
-  public crated_at: Date;
+  public created_at: Date;
 
   @ManyToOne(() => RespondentEntity, (respondent) => respondent.id, {
     eager: true,

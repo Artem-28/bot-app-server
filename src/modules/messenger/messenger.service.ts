@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  AuthMessengerDto,
   CreateMessageDto,
   OperatorConnectionDto,
   RespondentConnectionDto,
@@ -21,7 +20,6 @@ import {
   MessageAggregate,
 } from '@/models/message';
 import { MessageRepository } from '@/repositories/message';
-import { MapObject } from '@/common/types';
 import {
   IMessengerGroup,
   MessengerGroupAggregate,
@@ -29,7 +27,6 @@ import {
 import { ScriptAggregate } from '@/models/script';
 import { RespondentAggregate } from '@/models/respondent';
 import { UserAggregate } from '@/models/user';
-import { IsNull, Not } from 'typeorm';
 
 @Injectable()
 export class MessengerService {
@@ -42,30 +39,6 @@ export class MessengerService {
     private readonly _messageRepository: MessageRepository,
     private readonly _connectionRepository: MessengerConnectionRepository,
   ) {}
-
-  public async getConnectionToken(dto: AuthMessengerDto) {
-    // Получаем скрипт
-    const script = await this._scriptRepository.getOne({
-      filter: [
-        { field: 'id', value: dto.script_id },
-        { field: 'project_id', value: dto.project_id, operator: 'and' },
-      ],
-    });
-    // Если скрипт не был найден возврашаем ошибку
-    if (!script) {
-      throw new CommonError({ messages: errors.messenger.connect });
-    }
-    // Идентифицируем пользователя по отпечаткам
-    const respondent = await this._respondentService.respondentIdentity(
-      script.project_id,
-      dto.fingerprint,
-    );
-
-    return this._jwtService.sign({
-      respondent_id: respondent.id,
-      script_id: script.id,
-    });
-  }
 
   public async actualSession(dto: SessionDto) {
     // Ищем последнюю активную сессию

@@ -15,6 +15,7 @@ import { RespondentModule } from './modules/respondent';
 import { FingerprintModule } from '@/modules/fingerprint';
 import { MessengerModule } from '@/modules/messenger';
 import { WebsocketModule } from './modules/websocket';
+import { WidgetModule } from './modules/widget/widget.module';
 
 // Configuration
 
@@ -40,6 +41,7 @@ import { WebsocketModule } from './modules/websocket';
     FingerprintModule,
     MessengerModule,
     WebsocketModule,
+    WidgetModule,
   ],
   providers: [],
 })

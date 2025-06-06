@@ -50,7 +50,7 @@ export class MessageSessionAggregate implements IMessageSession {
   last_active_at: Date | null = null;
 
   @IsDate()
-  crated_at = new Date();
+  created_at = new Date();
 
   @IsOptional()
   respondent: RespondentAggregate | null = null;
@@ -81,7 +81,7 @@ export class MessageSessionAggregate implements IMessageSession {
     entries.forEach(([key, value]) => {
       this[key] = value;
     });
-    this.crated_at = this.id ? this.crated_at : new Date();
+    this.created_at = this.id ? this.created_at : new Date();
 
     const errors = validateSync(this, { whitelist: true });
     if (!!errors.length) {
@@ -108,7 +108,7 @@ export class MessageSessionAggregate implements IMessageSession {
       script_id: this.script_id,
       respondent_id: this.respondent_id,
       mode: this.mode,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       close_at: this.close_at,
       last_active_at: this.last_active_at,
     };

@@ -27,7 +27,7 @@ export interface IMessageSessionInstance {
   last_active_at: Date | null;
 
   /** Время создания сессии */
-  crated_at: Date;
+  created_at: Date;
 }
 
 export interface IMessageSessionRelation {

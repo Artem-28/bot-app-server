@@ -95,13 +95,7 @@ export class RespondentService {
         { field: 'fingerprint', value: fingerprint, operator: 'and' },
       ],
     });
-    if (!respondentFingerprint) {
-      return this.create({
-        project_id: projectId,
-        name: 'respondent.new',
-        fingerprints: hToArray(fingerprint),
-      });
-    }
+    if (!respondentFingerprint) return null;
 
     return this._respondentRepository.getOne({
       filter: { field: 'id', value: respondentFingerprint.respondent_id },

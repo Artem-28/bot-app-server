@@ -25,7 +25,7 @@ export class SubscriberAggregate implements ISubscriber {
   project_id: number;
 
   @IsDate()
-  crated_at = new Date();
+  created_at = new Date();
 
   static create(data: Partial<ISubscriber>) {
     const _entity = new SubscriberAggregate();
@@ -39,7 +39,7 @@ export class SubscriberAggregate implements ISubscriber {
     entries.forEach(([key, value]) => {
       this[key] = value;
     });
-    this.crated_at = this.crated_at || new Date();
+    this.created_at = this.created_at || new Date();
 
     const errors = validateSync(this, { whitelist: true });
     if (!!errors.length) {
@@ -51,7 +51,7 @@ export class SubscriberAggregate implements ISubscriber {
     return {
       user_id: this.user_id,
       project_id: this.project_id,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
     };
   }
 }
@@ -81,8 +81,8 @@ export class SubscriberUser
 
   static create(subscriber: ISubscriber, user: IUser) {
     const _entity = new SubscriberUser();
-    const { id, name, email, last_active_at, crated_at } = user;
-    const { project_id, crated_at: subscribe_at } = subscriber;
+    const { id, name, email, last_active_at, created_at } = user;
+    const { project_id, created_at: subscribe_at } = subscriber;
     _entity.update({
       project_id,
       name,
@@ -90,7 +90,7 @@ export class SubscriberUser
       last_active_at,
       id,
       subscribe_at,
-      crated_at,
+      created_at,
     });
 
     return _entity;

@@ -8,7 +8,7 @@ export class BaseAggregate<T> implements IBaseEntity {
   id?: number;
 
   @IsDate()
-  crated_at = new Date();
+  created_at = new Date();
 
   @IsDate()
   updated_at = new Date();
@@ -21,7 +21,7 @@ export class BaseAggregate<T> implements IBaseEntity {
       this[key] = value;
     });
     this.updated_at = new Date();
-    this.crated_at = this.id ? this.crated_at : new Date();
+    this.created_at = this.id ? this.created_at : new Date();
 
     const errors = validateSync(this, { whitelist: true });
     if (!!errors.length) {

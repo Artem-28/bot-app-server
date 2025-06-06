@@ -36,7 +36,7 @@ export class ProjectAggregate
       id: this.id,
       owner_id: this.owner_id,
       title: this.title,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
     };
   }

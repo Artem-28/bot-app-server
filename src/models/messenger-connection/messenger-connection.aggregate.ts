@@ -58,7 +58,7 @@ export class MessengerConnectionAggregate
       project_id: this.project_id,
       session_id: this.session_id,
       operator_id: this.operator_id,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
     };
   }

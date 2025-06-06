@@ -5,13 +5,10 @@ import { REQUEST } from '@nestjs/core';
 import { BuilderOptionsDto, HQueryBuilder } from '@/common/utils/builder';
 import { MessageSessionRepositoryDomain } from '@/repositories/message-session';
 import {
-  IMessageSession,
   IMessageSessionInstance,
   MessageSessionAggregate,
   MessageSessionEntity,
 } from '@/models/message-session';
-import {ScriptAggregate, ScriptEntity} from "@/models/script";
-import {log} from "util";
 
 @Injectable()
 export class MessageSessionRepository
@@ -46,6 +43,17 @@ export class MessageSessionRepository
     const repository = this.getRepository(MessageSessionEntity);
     const query = HQueryBuilder.select(repository, options);
 
+    const result = await query.builder.getOne();
+    if (!result) return null;
+    return MessageSessionAggregate.create(result);
+  }
+
+  // TODO доработать получение последней активной сессии
+  async lastActiveSession(
+    options?: BuilderOptionsDto<IMessageSessionInstance>,
+  ) {
+    const repository = this.getRepository(MessageSessionEntity);
+    const query = HQueryBuilder.select(repository, options);
     const result = await query.builder.getOne();
     if (!result) return null;
     return MessageSessionAggregate.create(result);

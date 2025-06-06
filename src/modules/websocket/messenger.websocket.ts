@@ -192,15 +192,10 @@ export class MessengerWebsocket
   private async getConnectionData(socket: Socket) {
     const headers = socket.handshake.headers;
 
-    let project_id: number | null = null;
+    let project_id: number | null = Number(headers['project-id']);
     let script_id: number | null = null;
     let operator_login: string | null = null;
     let respondent_id: number | null = null;
-
-    if (typeof headers['project-id'] !== 'string') {
-      throw new CommonError({ messages: 'errors.invalid_headers' });
-    }
-    project_id = Number(headers['project-id']);
 
     const token = headers['authorization'] as string;
     if (!token) {
@@ -208,6 +203,9 @@ export class MessengerWebsocket
     }
 
     const data = this._jwtService.verify(token, jwtConfig.verifyOptions);
+    if (data.project_id) {
+      project_id = data.project_id;
+    }
     if (data.script_id) {
       script_id = data.script_id;
     }
@@ -224,7 +222,7 @@ export class MessengerWebsocket
     const is_operator = !!operator_login;
     const is_respondent = !is_operator && !!respondent_id && !!script_id;
 
-    if (!is_respondent && !is_operator) {
+    if ((!is_respondent && !is_operator) || !project_id) {
       throw new CommonError({ messages: 'invalid_token' }, 403);
     }
 

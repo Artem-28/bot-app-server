@@ -8,7 +8,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { MessageSessionAggregate } from '@/models/message-session';
+import {
+  IMessageSession,
+  MessageSessionAggregate,
+} from '@/models/message-session';
 import { IUser, UserAggregate } from '@/models/user';
 
 export class MessageAggregate
@@ -58,7 +61,7 @@ export class MessageAggregate
       operator_id: this.operator_id,
       author_type: this.author_type,
       text: this.text,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
     };
   }
@@ -68,14 +71,21 @@ export class MessageAggregate
     if (this.operator) {
       operator = { name: this.operator.name };
     }
+    let session: Partial<IMessageSession> | null;
+    if (this.session) {
+      session = {
+        id: this.session.id,
+        mode: this.session.mode,
+      };
+    }
     return {
       id: this.id,
       text: this.text,
       author_type: this.author_type,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
       operator,
-      session: this.session,
+      session,
     };
   }
 }

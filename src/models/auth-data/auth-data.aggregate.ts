@@ -33,7 +33,7 @@ export class AuthDataAggregate
       login: this.login,
       password: this.password,
       hash_token: this.hash_token,
-      crated_at: this.crated_at,
+      created_at: this.created_at,
       updated_at: this.updated_at,
     };
   }
