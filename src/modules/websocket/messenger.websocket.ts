@@ -33,6 +33,7 @@ import { MessageAggregate } from '@/models/message';
 import { IUser, UserAggregate } from '@/models/user';
 import { IRespondent, RespondentAggregate } from '@/models/respondent';
 import { CreateMessageDto } from '@/modules/messenger/dto';
+import { IScript, ScriptAggregate } from '@/models/script';
 
 const SESSION_ROOM_KEY = '_session_room_';
 const PROJECT_ROOM_KEY = '_project_room_';
@@ -47,6 +48,7 @@ export class MessengerWebsocket
   private _operators = new Map<number, IUser>();
   private _respondents = new Map<number, IRespondent>();
   private _sessions = new Map<number, IMessageSessionInstance>();
+  private _scripts = new Map<number, IScript>();
 
   private readonly _respondentRepository = new RespondentRepository(
     this._dataSource,
@@ -90,6 +92,25 @@ export class MessengerWebsocket
     private readonly _dataSource: DataSource,
     private readonly _jwtService: JwtService,
   ) {}
+
+  private setScript(script: ScriptAggregate) {
+    if (!script) return;
+    this._scripts.set(script.id, script.instance);
+  }
+
+  private async getScript(id: number) {
+    if (this._scripts.has(id)) {
+      const data = this._scripts.get(id);
+      return ScriptAggregate.create(data);
+    }
+    const script = await this._scriptRepository.getOne({
+      filter: { field: 'id', value: id },
+    });
+    if (!script) return null;
+
+    this.setScript(script);
+    return script;
+  }
 
   private setSession(session: MessageSessionAggregate) {
     if (!session) return;
@@ -179,10 +200,20 @@ export class MessengerWebsocket
     this._respondents.set(respondent.id, respondent.instance);
   }
 
-  private getRespondent(id: number) {
-    const data = this._respondents.get(id);
-    if (!data) return null;
-    return RespondentAggregate.create(data);
+  private async getRespondent(id: number) {
+    if (this._respondents.has(id)) {
+      const data = this._respondents.get(id);
+      return RespondentAggregate.create(data);
+    }
+    // Может быть такое когда оператор отправляет сообщение респонденту который еще не подключен к сессии
+    // поэтому если нет загруженного респондента загружаем его
+    const respondent = await this._respondentRepository.getOne({
+      filter: { field: 'id', value: id },
+    });
+    if (!respondent) return null;
+
+    this.setRespondent(respondent);
+    return respondent;
   }
 
   private removeRespondent(id: number) {
@@ -239,21 +270,26 @@ export class MessengerWebsocket
   // Обработка сообщения от респондента
   private async handleRespondentSendMessage(dto: CreateMessageDto) {
     const message = await this._messengerService.createMessage(dto);
-    this.setSession(message.session);
-    this.emitMessage(message);
+    await this.emitMessage(message);
   }
 
   // Обработка сообщения от оператора
   private async handleOperatorSendMessage(dto: CreateMessageDto) {
     const message = await this._messengerService.createMessage(dto);
-    this.setSession(message.session);
-    this.emitMessage(message);
+    await this.emitMessage(message);
   }
 
-  private emitMessage(message: MessageAggregate) {
+  private async emitMessage(message: MessageAggregate) {
     const session = message.session;
 
-    const respondent = this.getRespondent(session.respondent_id);
+    this.setSession(session);
+
+    const script = await this.getScript(session.script_id);
+    if (script) {
+      session.setScript(script);
+    }
+
+    const respondent = await this.getRespondent(session.respondent_id);
     if (respondent) {
       message.session.setRespondent(respondent);
     }
@@ -276,6 +312,7 @@ export class MessengerWebsocket
     try {
       const data = await this.getConnectionData(socket);
 
+      // Обработка подключения оператора
       if (!data.is_respondent) {
         const connection = await this._messengerService.operatorConnect({
           client_id: data.client_id,
@@ -286,9 +323,10 @@ export class MessengerWebsocket
         this.setOperator(connection.operator);
 
         socket.join(PROJECT_ROOM_KEY + connection.project_id);
+        socket.emit('connected');
         return;
       }
-
+      // Обработка подключения респондента
       const session = await this._messengerService.actualSession({
         project_id: data.project_id,
         script_id: data.script_id,
@@ -301,9 +339,11 @@ export class MessengerWebsocket
       });
       this.setConnection(connection);
       this.setSession(session);
+      this.setScript(session.script);
       this.setRespondent(session.respondent);
 
       socket.join(SESSION_ROOM_KEY + session.id);
+      socket.emit('connected');
     } catch (e) {
       throw new CommonError({ messages: e });
     }
