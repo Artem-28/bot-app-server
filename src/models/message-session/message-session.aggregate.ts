@@ -16,6 +16,7 @@ import {
 import { IRespondent, RespondentAggregate } from '@/models/respondent';
 import { IMessage, MessageAggregate } from '@/models/message';
 import { DomainError } from '@/common/error';
+import { IScript, ScriptAggregate } from '@/models/script';
 
 export class MessageSessionAggregate implements IMessageSession {
   @IsOptional()
@@ -53,6 +54,9 @@ export class MessageSessionAggregate implements IMessageSession {
   created_at = new Date();
 
   @IsOptional()
+  script: ScriptAggregate | null = null;
+
+  @IsOptional()
   respondent: RespondentAggregate | null = null;
 
   @IsOptional()
@@ -65,7 +69,7 @@ export class MessageSessionAggregate implements IMessageSession {
   }
 
   update(data: Partial<IMessageSession>) {
-    const { respondent, messages, ...params } = data;
+    const { respondent, messages, script, ...params } = data;
     if (messages) {
       this.messages = [];
       messages.forEach((message) => this.appendMessage(message));
@@ -73,6 +77,9 @@ export class MessageSessionAggregate implements IMessageSession {
     if (respondent) {
       this.respondent_id = respondent.id;
       this.setRespondent(respondent);
+    }
+    if (script) {
+      this.setScript(script);
     }
 
     const entries = Object.entries(params);
@@ -87,6 +94,10 @@ export class MessageSessionAggregate implements IMessageSession {
     if (!!errors.length) {
       throw new DomainError(errors);
     }
+  }
+
+  setScript(script: IScript) {
+    this.script = ScriptAggregate.create(script);
   }
 
   setRespondent(respondent: IRespondent) {

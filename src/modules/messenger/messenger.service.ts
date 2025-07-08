@@ -48,7 +48,10 @@ export class MessengerService {
         { field: 'script_id', value: dto.script_id, operator: 'and' },
         { field: 'respondent_id', value: dto.respondent_id, operator: 'and' },
       ],
-      relation: { name: 'respondent', method: 'leftJoinAndSelect' },
+      relation: [
+        { name: 'respondent', method: 'leftJoinAndSelect' },
+        { name: 'script', method: 'leftJoinAndSelect' },
+      ],
     });
 
     if (session) return session;
@@ -82,6 +85,7 @@ export class MessengerService {
 
     session = await this._messageSessionRepository.create(session_instance);
     session.setRespondent(respondent);
+    session.setScript(script);
     return session;
   }
 

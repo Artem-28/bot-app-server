@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { RespondentEntity } from '@/models/respondent';
 import { SessionMode } from '@/models/message-session/message-session.interface';
+import {ScriptEntity} from "@/models/script";
 
 export const MESSAGE_SESSION_TABLE = 'message_sessions';
 
@@ -47,4 +48,10 @@ export class MessageSessionEntity {
   })
   @JoinColumn({ name: 'respondent_id', referencedColumnName: 'id' })
   public respondent: RespondentEntity;
+
+  @ManyToOne(() => ScriptEntity, (script) => script.id, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'script_id', referencedColumnName: 'id' })
+  public script: ScriptEntity;
 }

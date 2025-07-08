@@ -1,5 +1,6 @@
 import { IRespondent } from '@/models/respondent';
 import { IMessage } from '@/models/message';
+import { IScript } from '@/models/script';
 
 export enum SessionMode {
   OPERATOR = 'operator',
@@ -31,6 +32,7 @@ export interface IMessageSessionInstance {
 }
 
 export interface IMessageSessionRelation {
+  script: IScript | null;
   respondent: IRespondent | null;
   messages: IMessage[];
 }
