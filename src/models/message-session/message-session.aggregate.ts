@@ -2,10 +2,8 @@ import {
   IsDate,
   IsDefined,
   IsEnum,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsString,
   validateSync,
 } from 'class-validator';
 import {

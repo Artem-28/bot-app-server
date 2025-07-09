@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { RespondentEntity } from '@/models/respondent';
 import { SessionMode } from '@/models/message-session/message-session.interface';
-import {ScriptEntity} from "@/models/script";
+import { ScriptEntity } from '@/models/script';
 
 export const MESSAGE_SESSION_TABLE = 'message_sessions';
 
